@@ -110,8 +110,8 @@
             this.Cmd = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.IdName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Value = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -693,7 +693,7 @@
             this.groupBox3.Controls.Add(this.FetchTimeNud);
             this.groupBox3.Location = new System.Drawing.Point(342, 240);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Padding = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.groupBox3.Padding = new System.Windows.Forms.Padding(5);
             this.groupBox3.Size = new System.Drawing.Size(380, 133);
             this.groupBox3.TabIndex = 8;
             this.groupBox3.TabStop = false;
@@ -713,7 +713,7 @@
             this.panel1.Controls.Add(this.TEloreCbx);
             this.panel1.Controls.Add(this.EloreCbx);
             this.panel1.Location = new System.Drawing.Point(5, 37);
-            this.panel1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.panel1.Margin = new System.Windows.Forms.Padding(2);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(368, 95);
             this.panel1.TabIndex = 17;
@@ -1037,15 +1037,6 @@
             this.Value.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             this.Value.Width = 125;
             // 
-            // serialPort1
-            // 
-            this.serialPort1.ReadBufferSize = 1024;
-            this.serialPort1.ReadTimeout = 1000;
-            this.serialPort1.ReceivedBytesThreshold = 11;
-            this.serialPort1.WriteBufferSize = 1024;
-            this.serialPort1.WriteTimeout = 1000;
-            this.serialPort1.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.serialPort1_DataReceived);
-            // 
             // PufferTeszt
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1139,7 +1130,6 @@
         private System.Windows.Forms.Button DisconnectBtn;
         private System.Windows.Forms.Button ConnectBtn;
         private System.Windows.Forms.GroupBox groupBox6;
-        private System.IO.Ports.SerialPort serialPort1;
         private System.Windows.Forms.DataGridView IOTableViewDGV;
         private System.Windows.Forms.DataGridViewTextBoxColumn Id;
         private System.Windows.Forms.DataGridViewTextBoxColumn TransferDateTime;
@@ -1167,6 +1157,7 @@
         private System.Windows.Forms.TextBox BelsoTxb;
         private System.Windows.Forms.Label label30;
         private System.Windows.Forms.Timer timer1;
+        private System.IO.Ports.SerialPort serialPort1;
     }
 }
 

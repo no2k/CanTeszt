@@ -15,7 +15,8 @@ namespace PufferTeszt
 {
     public partial class PufferTeszt : Form
     {
-        
+        private ParamQueue<Parameter> parameters = new ParamQueue<Parameter>();
+        private SerialPortCommunicator communicator;
         private List<int> BaudRates { get; } = new List<int>() { 110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, 115200 };
         private const char StartBit = '#';
         private const char EndBit = '!';
@@ -28,15 +29,21 @@ namespace PufferTeszt
         int lastStatus = 0;
         int lastOpened = 0;
         int lastClosed = 0;
-        ParameterQueue CommandList = new ParameterQueue();
-        private TaskCompletionSource<string> responseTcs; // A válasz megvárásához
 
         public PufferTeszt()
         {
             InitializeComponent();
-            InitializePort();
-            CommandList.AddParameterEvent += QueryQueueParametersProcessorAsync;
-            responseTcs = new TaskCompletionSource<string>();
+            try
+            {
+                InitializePort();
+                communicator = new SerialPortCommunicator(serialPort1, parameters);
+                communicator.ResponseReceived += ProcessingResponseData;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+           
         }
 
         private void InitializePort()
@@ -56,15 +63,20 @@ namespace PufferTeszt
                 serialPort1.ReadTimeout = 5000;
                 serialPort1.WriteTimeout = 5000;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show(ex.Message);
+                throw;
             }
         }
 
         private void PortList_Cbx_SelectedIndexChanged(object sender, EventArgs e)
         {
             serialPort1.PortName =  PortList_Cbx.SelectedItem.ToString();
+        }
+        
+        private async void OnParameterAdded(object sender, Parameter parameter)
+        {
+            await ProcessQueueItem(parameter);
         }
 
         private void ConnectBtn_Click(object sender, EventArgs e)
@@ -108,7 +120,7 @@ namespace PufferTeszt
             {
                 serialPort1.Close();
                 serialPort1 = null;
-               // serialPort1.Dispose();
+              
             }
             catch (Exception ex)
             {
@@ -116,25 +128,11 @@ namespace PufferTeszt
             }
         }  
 
-        private void serialPort1_DataReceived(object sender, SerialDataReceivedEventArgs e)
-        {
-            this.Invoke(new EventHandler(ProcessingData));
-        }
-
-        private void ProcessingData(object sender, EventArgs e)
+        private void ProcessingResponseData(object sender, string response)
         {
             try
             {
-                //  SerialPort sp = (SerialPort)sender;
-                // string indata = sp.ReadExisting();
-               string receiveBuffer = serialPort1.ReadExisting();
-               // receiveBuffer += indata;
-                if (receiveBuffer.Length == 11)
-                {
-                    IOTableViewDGV.Rows.Add(ConvertToDGViewParams(DateTime.Now, receiveBuffer, ++dataIndex));
-                    RefreshDashboard(receiveBuffer);
-                    receiveBuffer = string.Empty;
-                }
+                this.Invoke(new Action<string>(RefreshDashboard),response);
             }
             catch (Exception ex)
             {
@@ -161,6 +159,7 @@ namespace PufferTeszt
             if (string.IsNullOrEmpty(data)) { return; };
             if ( data.First() == StartBit && data.Last() == EndBit)
             {
+                IOTableViewDGV.Rows.Add(ConvertToDGViewParams(DateTime.Now, data, ++dataIndex));
                 var dataArr = SeparateData(data);
                 if (dataArr.Length > 0 && dataArr[0] == Response) {
                     switch (dataArr[1])
@@ -200,6 +199,7 @@ namespace PufferTeszt
                 .Split(Delimiter);
         }
 
+        // FIXME: át kell dolgozni!!
         private void BealllitBtn_Click(object sender, EventArgs e)
         {
             try
@@ -318,10 +318,9 @@ namespace PufferTeszt
         {
             try
             {
-                if (!serialPort1.IsOpen)
-                {
-                    switch
-                }
+                throw new NotImplementedException("A lekérdezés nem implementált!");
+                // FIXME: megírni a checkbox állapotokhoz kötött lekérdezéseket,.
+                // majd legenerálni a parameter modelt és átadni a parameters queuenak
             }
             catch (Exception ex)
             {
@@ -329,13 +328,12 @@ namespace PufferTeszt
             }
         }
 
-        private async void QueryQueueParametersProcessorAsync(object sender, EventArgs e)
+        private async Task ProcessQueueItem(Parameter parameter)
         {
             // amikor feldolgozunk egy elemet megvárjuk a választ,
             // ha megjött a válasz akkor aszinkron kiíratjuk az eredményét
             // majd elküldjük a következő kérést.
-            Parameter parameter;
-            while
+           
         }
 
         private async void RefreshDashboardAsync(string data)

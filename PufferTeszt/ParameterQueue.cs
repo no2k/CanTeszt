@@ -7,54 +7,34 @@ using System.Threading.Tasks;
 
 namespace PufferTeszt
 {
-    public class ParameterQueue
+    public class ParamQueue<T> where T : class
     {
-        public event EventHandler AddParameterEvent;
-        public event EventHandler RemoveParameterEvent;
+        public event EventHandler<T> AddParameterEvent;
+       
+        public event EventHandler<T> RemoveParameterEvent;
+       
+        public int Count => parameters.Count;
+       
+        private Queue<T> parameters = new Queue<T>();
 
-        private Queue<Parameter> parameters = new Queue<Parameter>();
-
-        public void EnqueueParameter(Parameter parameter)
+        public void Enqueue(T parameter)
         {
            // parameter.QIndex = parameters.Count + 1;
             parameters.Enqueue(parameter);
-            AddParameterEvent?.Invoke(this, EventArgs.Empty);
+            AddParameterEvent?.Invoke(this, parameter);
         }
 
-        public Parameter DequeueParameter()
+        public T Dequeue()
         {
             if (parameters.Count > 0)
             {
-                RemoveParameterEvent?.Invoke(this, EventArgs.Empty);
-                var param = parameters.Dequeue().QIndex =parameters.Count;
+                var param = parameters.Dequeue();
+                RemoveParameterEvent?.Invoke(this, param);
                 parameters.TrimExcess();
-                return parameters.Dequeue();
+                return param;
             }
             return null;
         }
-
-        //private void UpdateQueueElementIndex(Queue<Parameter> oldQueue)
-        //{
-        //    if (queue.Count > 0)
-        //    {
-        //        queue.Dequeue(); // Eltávolítjuk az első elemet
-
-        //        Queue<MyQueueItem> tempQueue = new Queue<MyQueueItem>();
-        //        int newIndex = 0;
-        //        while (queue.Count > 0)
-        //        {
-        //            MyQueueItem item = queue.Dequeue();
-        //            item.Index = newIndex++;
-        //            tempQueue.Enqueue(item);
-        //        }
-
-        //        // Az ideiglenes queue tartalmának visszamásolása az eredetibe
-        //        while (tempQueue.Count > 0)
-        //        {
-        //            queue.Enqueue(tempQueue.Dequeue());
-        //        }
-        //    }
-        //}
 
     }
 }

@@ -39,14 +39,14 @@ namespace PufferTeszt
             {
                 InitializePort();
                 communicator = new SerialPortCommunicator(serialPort1, parameters);
-                communicator.ResponseReceived += ProcessingResponseData;
+                communicator.ResponseReceivedEvent += ProcessingResponseData;
+                communicator.DataSendedEvent += OnDataSended;
                 nfi.NumberDecimalDigits = 2; 
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
-           
         }
 
         private void InitializePort()
@@ -98,9 +98,7 @@ namespace PufferTeszt
 
         private void Baud_Cbx_SelectedIndexChanged(object sender, EventArgs e)
         {
-            
            serialPort1.BaudRate = (int)Baud_Cbx.SelectedItem;
-           
         }
 
         private void DisconnectBtn_Click(object sender, EventArgs e)
@@ -123,7 +121,6 @@ namespace PufferTeszt
             {
                 serialPort1.Close();
                 serialPort1 = null;
-              
             }
             catch (Exception ex)
             {
@@ -131,11 +128,23 @@ namespace PufferTeszt
             }
         }  
 
+        private void OnDataSended(object sender, string data)
+        {
+            try
+            {
+                this.Invoke(new Action<string>(RefreshDGVBoard), data);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
         private void ProcessingResponseData(object sender, string response)
         {
             try
             {
-                this.Invoke(new Action<string>(RefreshDashboard),response);
+                this.Invoke(new Action<string>(RefreshDashboard), response);
+                this.Invoke(new Action<string>(RefreshDGVBoard), response);
             }
             catch (Exception ex)
             {
@@ -157,12 +166,13 @@ namespace PufferTeszt
             }
         }
 
+        private void RefreshDGVBoard(string data)
+            => IOTableViewDGV.Rows.Add(ConvertToDGViewParams(DateTime.Now, data, ++dataIndex));
         private void RefreshDashboard(string data)
         {
             if (string.IsNullOrEmpty(data)) { return; };
             if ( data.First() == StartBit && data.Last() == EndBit)
             {
-                IOTableViewDGV.Rows.Add(ConvertToDGViewParams(DateTime.Now, data, ++dataIndex));
                 var dataArr = SeparateData(data);
                 if (dataArr.Length > 0 && dataArr[0] == Response) {
                     switch (dataArr[1])

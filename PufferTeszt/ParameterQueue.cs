@@ -9,9 +9,9 @@ namespace PufferTeszt
 {
     public class ParamQueue<T> where T : class
     {
-        public event EventHandler<T> AddParameterEvent;
+        public event EventHandler AddParameterEvent;
        
-        public event EventHandler<T> RemoveParameterEvent;
+        public event EventHandler RemoveParameterEvent;
        
         public int Count => parameters.Count;
        
@@ -21,7 +21,7 @@ namespace PufferTeszt
         {
            // parameter.QIndex = parameters.Count + 1;
             parameters.Enqueue(parameter);
-            AddParameterEvent?.Invoke(this, parameter);
+            AddParameterEvent?.Invoke(this, EventArgs.Empty);
         }
 
         public T Dequeue()
@@ -29,7 +29,7 @@ namespace PufferTeszt
             if (parameters.Count > 0)
             {
                 var param = parameters.Dequeue();
-                RemoveParameterEvent?.Invoke(this, param);
+                RemoveParameterEvent?.Invoke(this, EventArgs.Empty);
                 parameters.TrimExcess();
                 return param;
             }

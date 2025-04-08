@@ -9,7 +9,8 @@ namespace PufferTeszt
 {
     public class SerialPortCommunicator
     {
-        public event EventHandler<string> ResponseReceived; // esemény a feldolgozáshoz 
+        public event EventHandler<string> ResponseReceivedEvent; // esemény a válaszhoz
+        public event EventHandler<string> DataSendedEvent;
         private const char StartBit = '#';
         private const char EndBit = '!';
         private const char Delimiter = ';';
@@ -27,7 +28,7 @@ namespace PufferTeszt
             this.parameters = parameters;
             parameters.AddParameterEvent += OnAddParameter;
             serialPort.DataReceived += OnDataReceived;
-
+            responseTcs = new TaskCompletionSource<string>();
         }
 
         private void OnDataReceived(object sender, SerialDataReceivedEventArgs e)
@@ -40,9 +41,13 @@ namespace PufferTeszt
                     ProcessResponse(receivedData);
                     if (isWaitingForResponse)
                     {
-                        responseTcs.SetResult(receivedData);
+                        if (!responseTcs.Task.IsCompleted)
+                        {
+                            responseTcs.SetResult(receivedData);
+                        }
                         isWaitingForResponse = false;
                     }
+                    receivedData = null;
                 }
                 // Ha nem teljes a válasz, tároljuk vagy dolgozzuk fel részlegesen
                 // A következő DataReceived eseménykor folytatjuk
@@ -58,53 +63,44 @@ namespace PufferTeszt
             }
         }
 
-        private async void OnAddParameter(object sender, Parameter e)
+        private async void OnAddParameter(object sender, EventArgs e)
         {
-            await ProcessParameterItem(e);
+            await ProcessParameterItem();
         }
 
-        private async Task ProcessParameterItem(Parameter parameter)
+        private async Task ProcessParameterItem()
         {
             if (serialPort.IsOpen)
             {
                 try
                 {
-                    // elküldjük a parancsot...
-                    byte[] data = Encoding.ASCII.GetBytes(parameter.Param);
-                    await serialPort.BaseStream.WriteAsync(data, 0, data.Length);
-                    isWaitingForResponse = true;
-                    // várunk a válaszra...
-                    Task<string> responseTask = responseTcs.Task;
-                    Task timeoutTask = Task.Delay(5000); // 5 másodperces timeout
-                    Task completedTask = await Task.WhenAny(responseTask, timeoutTask);
-                    if (completedTask == responseTask)
+                    while (parameters.Count > 0)
                     {
-                        // A válasz megérkezett
-                        string response = await responseTask;
-                        // Feldolgozás...
-                        // FIXME: nem feltétlen kell!!!
-                        ProcessResponse(response);
-                        parameters.Dequeue();
-                        // Új TaskCompletionSource létrehozása
-                        responseTcs = new TaskCompletionSource<string>();
-                        isWaitingForResponse = false;
-                    }
-                    else
-                    {
-                        // Timeout történt
-                        Console.WriteLine($"Időtúllépés a válaszra: {parameter}");
-                        // throw new TimeoutException("A válasz nem érkezett meg időben.");
-                        //parameters.Dequeue();
-                        responseTcs = new TaskCompletionSource<string>();
+                        if (!isWaitingForResponse)
+                        {
+                            var parameter = parameters.Dequeue();
+                            var localeTask = new TaskCompletionSource<string>();
+                            responseTcs = localeTask;
+                            isWaitingForResponse = true;
+                            // elküldjük a parancsot...
+                            byte[] data = Encoding.ASCII.GetBytes(parameter.Param);
+                            serialPort.RtsEnable = true;
+                            serialPort.Write(data, 0, data.Length);
+                            serialPort.RtsEnable = false;
+                            DataSendedEvent?.Invoke(this, parameter.Param);
+                        }
+                        // várunk a válaszra...
+                        //Task<string> responseTask = responseTcs.Task;
+                        Task timeoutTask = Task.Delay(10000); // 5 másodperces timeout
+                       // Task completedTask = await Task.WhenAny(responseTask, timeoutTask);
+                        Task completedTask = await Task.WhenAny(responseTcs.Task, timeoutTask);
+                       // várakozni kell
                         isWaitingForResponse = false;
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Hiba a soros porti kommunikáció során: {ex.Message}");
-                    // Hibakezelés (pl. elem eltávolítása a Q-ból, újrapróbálkozás)
-                    // parameters.Dequeue();
-                    responseTcs = new TaskCompletionSource<string>();
                     isWaitingForResponse = false;
                 }
             }
@@ -112,10 +108,8 @@ namespace PufferTeszt
 
         private void ProcessResponse(string response)
         {
-            ResponseReceived?.Invoke(this, response);
-            throw new NotImplementedException("Válasz feldolgozás nincs implementálva!");
+            ResponseReceivedEvent?.Invoke(this, response);
         }
-
        
     }
 }

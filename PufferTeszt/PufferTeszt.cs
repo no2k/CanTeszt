@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.IO.Ports;
 using System.Linq;
 using System.Linq.Expressions;
@@ -29,6 +30,7 @@ namespace PufferTeszt
         int lastStatus = 0;
         int lastOpened = 0;
         int lastClosed = 0;
+        NumberFormatInfo nfi = new NumberFormatInfo(); 
 
         public PufferTeszt()
         {
@@ -38,6 +40,7 @@ namespace PufferTeszt
                 InitializePort();
                 communicator = new SerialPortCommunicator(serialPort1, parameters);
                 communicator.ResponseReceived += ProcessingResponseData;
+                nfi.NumberDecimalDigits = 2; 
             }
             catch (Exception ex)
             {
@@ -204,86 +207,36 @@ namespace PufferTeszt
         {
             try
             {
-                if(lastClosed != (int)NewCloseNud.Value)
+                if (lastClosed != (int)NewCloseNud.Value)
                 {
-                    string numeric = NewCloseNud.Value.ToString("D2");
-                    var data = StartBit 
-                        + SETData 
-                        + Delimiter 
-                        + "KI" 
-                        + Delimiter 
-                        + numeric 
-                        + EndBit;
-                    SendData(data);
-                    System.Threading.Thread.Sleep(100);
-                    //FIXME: visszaellenőrzés?
+                    var data = GenerateSendingData(SETData, "KI", (int)NewCloseNud.Value);
+                    parameters.Enqueue(new Parameter(data, true));
                 }
-                if(lastOpened != (int)NewOpenNud.Value)
+                if (lastOpened != (int)NewOpenNud.Value)
                 {
-                    string numeric = NewOpenNud.Value.ToString("D2");
-                    var data = StartBit
-                       + SETData
-                       + Delimiter
-                       + "BE"
-                       + Delimiter
-                       + numeric
-                       + EndBit;
-                    SendData(data);
-                    System.Threading.Thread.Sleep(100);
-                    //FIXME: visszaellenőrzés?
+                    var data = GenerateSendingData(SETData, "BE", (int)NewOpenNud.Value);
+                    parameters.Enqueue(new Parameter(data, true));
+
                 }
                 if (lastStatus != (int)NewStatusNud.Value)
                 {
-                    string numeric = NewStatusNud.Value.ToString("D2");
-                    var data = StartBit
-                       + SETData
-                       + Delimiter
-                       + "ST"
-                       + Delimiter
-                       + numeric
-                       + EndBit;
-                    SendData(data);
-                    System.Threading.Thread.Sleep(100);
-                    //FIXME: visszaellenőrzés?
+                    var data = GenerateSendingData(SETData, "ST", (int)NewStatusNud.Value);
+                    parameters.Enqueue(new Parameter(data, true));
                 }
-                if (FullZarCbx.Checked) 
+                if (FullZarCbx.Checked)
                 {
-                    var data = StartBit
-                       + SETData
-                       + Delimiter
-                       + "OF"
-                       + Delimiter
-                       + "00"
-                       + EndBit;
-                    SendData(data);
-                    System.Threading.Thread.Sleep(100);
-                    //FIXME: visszaellenőrzés?
+                    var data = GenerateSendingData(SETData, "OF", 0);
+                    parameters.Enqueue(new Parameter(data, true));
                 }
                 if (FullNyitCbx.Checked)
                 {
-                    var data = StartBit
-                       + SETData
-                       + Delimiter
-                       + "ON"
-                       + Delimiter
-                       + "00"
-                       + EndBit;
-                    SendData(data);
-                    System.Threading.Thread.Sleep(100);
-                    //FIXME: visszaellenőrzés?
+                    var data = GenerateSendingData(SETData, "ON", 0);
+                    parameters.Enqueue(new Parameter(data, true));
                 }
                 if (VeszhutesCBx.Checked)
                 {
-                    var data = StartBit
-                       + SETData
-                       + Delimiter
-                       + "EM"
-                       + Delimiter
-                       + "00"
-                       + EndBit;
-                    SendData(data);
-                    System.Threading.Thread.Sleep(100);
-                    //FIXME: visszaellenőrzés?
+                    var data = GenerateSendingData(SETData, "EM", 0);
+                    parameters.Enqueue(new Parameter(data, true));
                 }
             }
             catch (Exception ex)
@@ -344,6 +297,18 @@ namespace PufferTeszt
                 var actualRowIndex = IOTableViewDGV.Rows.Count; 
                 IOTableViewDGV.Rows.Add(ConvertToDGViewParams(DateTime.Now, data, actualRowIndex + 1));
             }
+        }
+
+        public string GenerateSendingData(string command, string id, int value = 0 )
+        {
+            var data = StartBit
+                       + command
+                       + Delimiter
+                       + id
+                       + Delimiter
+                       + value.ToString("00")
+                       + EndBit;
+            return data;
         }
     }
 }

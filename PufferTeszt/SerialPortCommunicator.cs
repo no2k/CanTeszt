@@ -115,5 +115,7 @@ namespace PufferTeszt
             ResponseReceived?.Invoke(this, response);
             throw new NotImplementedException("Válasz feldolgozás nincs implementálva!");
         }
+
+       
     }
 }

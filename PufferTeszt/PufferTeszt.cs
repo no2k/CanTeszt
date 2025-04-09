@@ -39,13 +39,11 @@ namespace PufferTeszt
             InitializeComponent();
             try
             {
-
                 InitializePort();
                 communicator = new SerialPortCommunicator(serialPort1, parameters, default);
                 communicator.ResponseReceivedEvent += ProcessingResponseData;
                 communicator.DataSendedEvent += OnDataSended;
                 nfi.NumberDecimalDigits = 2;
-                
             }
             catch (Exception ex)
             {
@@ -81,11 +79,6 @@ namespace PufferTeszt
             serialPort1.PortName =  PortList_Cbx.SelectedItem.ToString();
         }
         
-        private async void OnParameterAdded(object sender, Parameter parameter)
-        {
-            await ProcessQueueItem(parameter);
-        }
-
         private void ConnectBtn_Click(object sender, EventArgs e)
         {
             try
@@ -94,6 +87,10 @@ namespace PufferTeszt
                 ConnectBtn.Enabled = false;
                 DisconnectBtn.Enabled = true;
                 communicator.StartCommunication();
+                PortList_Cbx.Enabled = false;
+                Baud_Cbx.Enabled = false;
+                StateBox.Enabled = true;
+                ScannBox.Enabled = true;
             }
             catch (Exception ex)
             {
@@ -114,6 +111,10 @@ namespace PufferTeszt
                 DisconnectBtn.Enabled = false;
                 ConnectBtn.Enabled = true;
                 communicator.StopCommunication();
+                PortList_Cbx.Enabled = true;
+                Baud_Cbx.Enabled = true;
+                StateBox.Enabled = false;
+                ScannBox.Enabled = false;
             }
             catch (Exception ex)
             {
@@ -202,11 +203,39 @@ namespace PufferTeszt
                             break;
                         case "P7": BelsoTxb.Text = dataArr[2];
                             break;
-                        case "KI": ActualCloseTxb.Text = dataArr[2];
+                        case "KI": 
+                            {
+                                ActualCloseTxb.Text = dataArr[2];
+                                lastClosed = int.Parse(dataArr[2]);
+                            }
                             break;
-                        case "BE": ActualOpenTxb.Text = dataArr[2];
+                        case "BE":
+                            {
+                                ActualOpenTxb.Text = dataArr[2];
+                                lastOpened = int.Parse(dataArr[2]);
+                            }
                             break;
-                        case "ST": ActualStatusTxb.Text = dataArr[2];
+                        case "ST":
+                            {
+                                var value = int.Parse(dataArr[2]);
+                                ActualStatusTxb.Text = dataArr[2];
+                                lastStatus = value;
+                                if (value >= 99)
+                                {
+                                    FullNyitCbx.ForeColor = Color.FromArgb(25, 0, 255, 0);
+                                    FullZarCbx.ForeColor = Color.FromArgb(25, 255, 0, 0);
+                                }
+                                else if (value <= 1)
+                                {
+                                    FullNyitCbx.ForeColor = Color.FromArgb(25, 255, 0, 0);
+                                    FullZarCbx.ForeColor = Color.FromArgb(25, 0, 255, 0);
+                                }
+                                else
+                                {
+                                    FullNyitCbx.ForeColor = Color.FromArgb(25, Color.LightYellow);
+                                    FullZarCbx.ForeColor = Color.FromArgb(25, Color.LightYellow);
+                                }
+                            }
                             break;
                     }      
                 }
@@ -268,38 +297,6 @@ namespace PufferTeszt
             timer1.Interval = (int)FetchTimeNud.Value*1000;
         }
 
-        private void StartFetchBtn_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                throw new NotImplementedException("A lekérdezés nem implementált!");
-                // FIXME: megírni a checkbox állapotokhoz kötött lekérdezéseket,.
-                // majd legenerálni a parameter modelt és átadni a parameters queuenak
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-        }
-
-        private async Task ProcessQueueItem(Parameter parameter)
-        {
-            // amikor feldolgozunk egy elemet megvárjuk a választ,
-            // ha megjött a válasz akkor aszinkron kiíratjuk az eredményét
-            // majd elküldjük a következő kérést.
-           
-        }
-
-        private async void RefreshDashboardAsync(string data)
-        {
-            if (!string.IsNullOrWhiteSpace(data))
-            {
-                RefreshDashboard(data);
-                var actualRowIndex = IOTableViewDGV.Rows.Count; 
-                IOTableViewDGV.Rows.Add(ConvertToDGViewParams(DateTime.Now, data, actualRowIndex + 1));
-            }
-        }
-
         public string GenerateSendingData(string command, string id, int value = 0 )
         {
             var data = StartBit
@@ -310,6 +307,50 @@ namespace PufferTeszt
                        + value.ToString("00")
                        + EndBit;
             return data;
+        }
+
+        private void StartFetchBtn_Click(object sender, EventArgs e)
+        {
+            StartFetchBtn.Enabled = false;
+            StopFetchBtn.Enabled = true;
+            timer1.Start();
+        }
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            var data = GenerateSendingData(GetData, "P0");
+            parameters.Enqueue(new Parameter(data, true));
+            data = GenerateSendingData(GetData, "P1");
+            parameters.Enqueue(new Parameter(data, true));
+            data = GenerateSendingData(GetData, "P2");
+            parameters.Enqueue(new Parameter(data, true));
+            data = GenerateSendingData(GetData, "P3");
+            parameters.Enqueue(new Parameter(data, true));
+            data = GenerateSendingData(GetData, "P4");
+            parameters.Enqueue(new Parameter(data, true));
+            data = GenerateSendingData(GetData, "P5");
+            parameters.Enqueue(new Parameter(data, true));
+            data = GenerateSendingData(GetData, "P6");
+            parameters.Enqueue(new Parameter(data, true));
+            data = GenerateSendingData(GetData, "P7");
+            parameters.Enqueue(new Parameter(data, true));
+            data = GenerateSendingData(GetData, "KI");
+            parameters.Enqueue(new Parameter(data, true));
+            data = GenerateSendingData(GetData, "BE");
+            parameters.Enqueue(new Parameter(data, true));
+            data = GenerateSendingData(GetData, "ST");
+            parameters.Enqueue(new Parameter(data, true));
+        }
+
+        private void StopFetchBtn_Click(object sender, EventArgs e)
+        {
+            timer1.Stop();
+            StartFetchBtn.Enabled = true;
+            StopFetchBtn.Enabled = false;
+        }
+
+        private void RTSInvertCbx_CheckedChanged(object sender, EventArgs e)
+        {
+            communicator.RTSInvert = RTSInvertCbx.Checked;
         }
     }
 }

@@ -55,7 +55,7 @@
             this.ActualTFelsoTxb = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
-            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.StateBox = new System.Windows.Forms.GroupBox();
             this.FullNyitCbx = new System.Windows.Forms.CheckBox();
             this.FullZarCbx = new System.Windows.Forms.CheckBox();
             this.BealllitBtn = new System.Windows.Forms.Button();
@@ -78,20 +78,7 @@
             this.label19 = new System.Windows.Forms.Label();
             this.ActualStatusTxb = new System.Windows.Forms.TextBox();
             this.label20 = new System.Windows.Forms.Label();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.BelsoCbx = new System.Windows.Forms.CheckBox();
-            this.ZarasCbx = new System.Windows.Forms.CheckBox();
-            this.NyitasCbx = new System.Windows.Forms.CheckBox();
-            this.SzelepStatCbx = new System.Windows.Forms.CheckBox();
-            this.TKozepCbx = new System.Windows.Forms.CheckBox();
-            this.TFelsoCbx = new System.Windows.Forms.CheckBox();
-            this.TAlsoCbx = new System.Windows.Forms.CheckBox();
-            this.TVisszaCbx = new System.Windows.Forms.CheckBox();
-            this.VisszaCbx = new System.Windows.Forms.CheckBox();
-            this.TEloreCbx = new System.Windows.Forms.CheckBox();
-            this.EloreCbx = new System.Windows.Forms.CheckBox();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.ScannBox = new System.Windows.Forms.GroupBox();
             this.StopFetchBtn = new System.Windows.Forms.Button();
             this.StartFetchBtn = new System.Windows.Forms.Button();
             this.FetchTimeNud = new System.Windows.Forms.NumericUpDown();
@@ -112,14 +99,15 @@
             this.Value = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
+            this.label31 = new System.Windows.Forms.Label();
+            this.RTSInvertCbx = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
-            this.groupBox4.SuspendLayout();
+            this.StateBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.NewCloseNud)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.NewOpenNud)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.NewStatusNud)).BeginInit();
-            this.groupBox3.SuspendLayout();
-            this.panel1.SuspendLayout();
+            this.ScannBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.FetchTimeNud)).BeginInit();
             this.groupBox5.SuspendLayout();
             this.groupBox6.SuspendLayout();
@@ -402,37 +390,38 @@
             this.label12.TabIndex = 0;
             this.label12.Text = "Puffer felső hőmérséklet";
             // 
-            // groupBox4
+            // StateBox
             // 
-            this.groupBox4.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.groupBox4.Controls.Add(this.FullNyitCbx);
-            this.groupBox4.Controls.Add(this.FullZarCbx);
-            this.groupBox4.Controls.Add(this.BealllitBtn);
-            this.groupBox4.Controls.Add(this.VeszhutesCBx);
-            this.groupBox4.Controls.Add(this.label24);
-            this.groupBox4.Controls.Add(this.label25);
-            this.groupBox4.Controls.Add(this.label26);
-            this.groupBox4.Controls.Add(this.label22);
-            this.groupBox4.Controls.Add(this.label23);
-            this.groupBox4.Controls.Add(this.label21);
-            this.groupBox4.Controls.Add(this.NewCloseNud);
-            this.groupBox4.Controls.Add(this.NewOpenNud);
-            this.groupBox4.Controls.Add(this.label15);
-            this.groupBox4.Controls.Add(this.label16);
-            this.groupBox4.Controls.Add(this.ActualCloseTxb);
-            this.groupBox4.Controls.Add(this.ActualOpenTxb);
-            this.groupBox4.Controls.Add(this.label17);
-            this.groupBox4.Controls.Add(this.label18);
-            this.groupBox4.Controls.Add(this.NewStatusNud);
-            this.groupBox4.Controls.Add(this.label19);
-            this.groupBox4.Controls.Add(this.ActualStatusTxb);
-            this.groupBox4.Controls.Add(this.label20);
-            this.groupBox4.Location = new System.Drawing.Point(340, 75);
-            this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(383, 161);
-            this.groupBox4.TabIndex = 7;
-            this.groupBox4.TabStop = false;
-            this.groupBox4.Text = "Szelep státusz";
+            this.StateBox.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.StateBox.Controls.Add(this.FullNyitCbx);
+            this.StateBox.Controls.Add(this.FullZarCbx);
+            this.StateBox.Controls.Add(this.BealllitBtn);
+            this.StateBox.Controls.Add(this.VeszhutesCBx);
+            this.StateBox.Controls.Add(this.label24);
+            this.StateBox.Controls.Add(this.label25);
+            this.StateBox.Controls.Add(this.label26);
+            this.StateBox.Controls.Add(this.label22);
+            this.StateBox.Controls.Add(this.label23);
+            this.StateBox.Controls.Add(this.label21);
+            this.StateBox.Controls.Add(this.NewCloseNud);
+            this.StateBox.Controls.Add(this.NewOpenNud);
+            this.StateBox.Controls.Add(this.label15);
+            this.StateBox.Controls.Add(this.label16);
+            this.StateBox.Controls.Add(this.ActualCloseTxb);
+            this.StateBox.Controls.Add(this.ActualOpenTxb);
+            this.StateBox.Controls.Add(this.label17);
+            this.StateBox.Controls.Add(this.label18);
+            this.StateBox.Controls.Add(this.NewStatusNud);
+            this.StateBox.Controls.Add(this.label19);
+            this.StateBox.Controls.Add(this.ActualStatusTxb);
+            this.StateBox.Controls.Add(this.label20);
+            this.StateBox.Enabled = false;
+            this.StateBox.Location = new System.Drawing.Point(340, 75);
+            this.StateBox.Name = "StateBox";
+            this.StateBox.Size = new System.Drawing.Size(383, 161);
+            this.StateBox.TabIndex = 7;
+            this.StateBox.TabStop = false;
+            this.StateBox.Text = "Szelep státusz";
             // 
             // FullNyitCbx
             // 
@@ -683,160 +672,21 @@
             this.label20.TabIndex = 5;
             this.label20.Text = "Státusz";
             // 
-            // groupBox3
+            // ScannBox
             // 
-            this.groupBox3.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.groupBox3.Controls.Add(this.panel1);
-            this.groupBox3.Controls.Add(this.checkBox1);
-            this.groupBox3.Controls.Add(this.StopFetchBtn);
-            this.groupBox3.Controls.Add(this.StartFetchBtn);
-            this.groupBox3.Controls.Add(this.FetchTimeNud);
-            this.groupBox3.Location = new System.Drawing.Point(342, 240);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Padding = new System.Windows.Forms.Padding(5);
-            this.groupBox3.Size = new System.Drawing.Size(380, 133);
-            this.groupBox3.TabIndex = 8;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Lekérdezés";
-            // 
-            // panel1
-            // 
-            this.panel1.Controls.Add(this.BelsoCbx);
-            this.panel1.Controls.Add(this.ZarasCbx);
-            this.panel1.Controls.Add(this.NyitasCbx);
-            this.panel1.Controls.Add(this.SzelepStatCbx);
-            this.panel1.Controls.Add(this.TKozepCbx);
-            this.panel1.Controls.Add(this.TFelsoCbx);
-            this.panel1.Controls.Add(this.TAlsoCbx);
-            this.panel1.Controls.Add(this.TVisszaCbx);
-            this.panel1.Controls.Add(this.VisszaCbx);
-            this.panel1.Controls.Add(this.TEloreCbx);
-            this.panel1.Controls.Add(this.EloreCbx);
-            this.panel1.Location = new System.Drawing.Point(5, 37);
-            this.panel1.Margin = new System.Windows.Forms.Padding(2);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(368, 95);
-            this.panel1.TabIndex = 17;
-            // 
-            // BelsoCbx
-            // 
-            this.BelsoCbx.AutoSize = true;
-            this.BelsoCbx.Location = new System.Drawing.Point(91, 76);
-            this.BelsoCbx.Name = "BelsoCbx";
-            this.BelsoCbx.Size = new System.Drawing.Size(78, 17);
-            this.BelsoCbx.TabIndex = 26;
-            this.BelsoCbx.Text = "Belső hőm.";
-            this.BelsoCbx.UseVisualStyleBackColor = true;
-            // 
-            // ZarasCbx
-            // 
-            this.ZarasCbx.AutoSize = true;
-            this.ZarasCbx.Location = new System.Drawing.Point(177, 29);
-            this.ZarasCbx.Name = "ZarasCbx";
-            this.ZarasCbx.Size = new System.Drawing.Size(81, 17);
-            this.ZarasCbx.TabIndex = 25;
-            this.ZarasCbx.Text = "Zárási hőm.";
-            this.ZarasCbx.UseVisualStyleBackColor = true;
-            // 
-            // NyitasCbx
-            // 
-            this.NyitasCbx.AutoSize = true;
-            this.NyitasCbx.Location = new System.Drawing.Point(177, 6);
-            this.NyitasCbx.Name = "NyitasCbx";
-            this.NyitasCbx.Size = new System.Drawing.Size(83, 17);
-            this.NyitasCbx.TabIndex = 24;
-            this.NyitasCbx.Text = "Nyitási hőm.";
-            this.NyitasCbx.UseVisualStyleBackColor = true;
-            // 
-            // SzelepStatCbx
-            // 
-            this.SzelepStatCbx.AutoSize = true;
-            this.SzelepStatCbx.Location = new System.Drawing.Point(177, 53);
-            this.SzelepStatCbx.Name = "SzelepStatCbx";
-            this.SzelepStatCbx.Size = new System.Drawing.Size(74, 17);
-            this.SzelepStatCbx.TabIndex = 23;
-            this.SzelepStatCbx.Text = "Szelep áll.";
-            this.SzelepStatCbx.UseVisualStyleBackColor = true;
-            // 
-            // TKozepCbx
-            // 
-            this.TKozepCbx.AutoSize = true;
-            this.TKozepCbx.Location = new System.Drawing.Point(91, 29);
-            this.TKozepCbx.Name = "TKozepCbx";
-            this.TKozepCbx.Size = new System.Drawing.Size(78, 17);
-            this.TKozepCbx.TabIndex = 22;
-            this.TKozepCbx.Text = "P.T. közép";
-            this.TKozepCbx.UseVisualStyleBackColor = true;
-            // 
-            // TFelsoCbx
-            // 
-            this.TFelsoCbx.AutoSize = true;
-            this.TFelsoCbx.Location = new System.Drawing.Point(91, 6);
-            this.TFelsoCbx.Name = "TFelsoCbx";
-            this.TFelsoCbx.Size = new System.Drawing.Size(71, 17);
-            this.TFelsoCbx.TabIndex = 21;
-            this.TFelsoCbx.Text = "P.T. felső";
-            this.TFelsoCbx.UseVisualStyleBackColor = true;
-            // 
-            // TAlsoCbx
-            // 
-            this.TAlsoCbx.AutoSize = true;
-            this.TAlsoCbx.Location = new System.Drawing.Point(91, 53);
-            this.TAlsoCbx.Name = "TAlsoCbx";
-            this.TAlsoCbx.Size = new System.Drawing.Size(65, 17);
-            this.TAlsoCbx.TabIndex = 20;
-            this.TAlsoCbx.Text = "P.T alsó";
-            this.TAlsoCbx.UseVisualStyleBackColor = true;
-            // 
-            // TVisszaCbx
-            // 
-            this.TVisszaCbx.AutoSize = true;
-            this.TVisszaCbx.Location = new System.Drawing.Point(5, 76);
-            this.TVisszaCbx.Name = "TVisszaCbx";
-            this.TVisszaCbx.Size = new System.Drawing.Size(78, 17);
-            this.TVisszaCbx.TabIndex = 19;
-            this.TVisszaCbx.Text = "P.T. vissza";
-            this.TVisszaCbx.UseVisualStyleBackColor = true;
-            // 
-            // VisszaCbx
-            // 
-            this.VisszaCbx.AutoSize = true;
-            this.VisszaCbx.Location = new System.Drawing.Point(5, 29);
-            this.VisszaCbx.Name = "VisszaCbx";
-            this.VisszaCbx.Size = new System.Drawing.Size(67, 17);
-            this.VisszaCbx.TabIndex = 18;
-            this.VisszaCbx.Text = "F. vissza";
-            this.VisszaCbx.UseVisualStyleBackColor = true;
-            // 
-            // TEloreCbx
-            // 
-            this.TEloreCbx.AutoSize = true;
-            this.TEloreCbx.Location = new System.Drawing.Point(5, 53);
-            this.TEloreCbx.Name = "TEloreCbx";
-            this.TEloreCbx.Size = new System.Drawing.Size(72, 17);
-            this.TEloreCbx.TabIndex = 17;
-            this.TEloreCbx.Text = "P.T. előre";
-            this.TEloreCbx.UseVisualStyleBackColor = true;
-            // 
-            // EloreCbx
-            // 
-            this.EloreCbx.AutoSize = true;
-            this.EloreCbx.Location = new System.Drawing.Point(5, 6);
-            this.EloreCbx.Name = "EloreCbx";
-            this.EloreCbx.Size = new System.Drawing.Size(61, 17);
-            this.EloreCbx.TabIndex = 16;
-            this.EloreCbx.Text = "F. előre";
-            this.EloreCbx.UseVisualStyleBackColor = true;
-            // 
-            // checkBox1
-            // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(5, 16);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(132, 17);
-            this.checkBox1.TabIndex = 16;
-            this.checkBox1.Text = "lekérdezési ciklus(mp):";
-            this.checkBox1.UseVisualStyleBackColor = true;
+            this.ScannBox.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.ScannBox.Controls.Add(this.label31);
+            this.ScannBox.Controls.Add(this.StopFetchBtn);
+            this.ScannBox.Controls.Add(this.StartFetchBtn);
+            this.ScannBox.Controls.Add(this.FetchTimeNud);
+            this.ScannBox.Enabled = false;
+            this.ScannBox.Location = new System.Drawing.Point(342, 240);
+            this.ScannBox.Name = "ScannBox";
+            this.ScannBox.Padding = new System.Windows.Forms.Padding(5);
+            this.ScannBox.Size = new System.Drawing.Size(380, 48);
+            this.ScannBox.TabIndex = 8;
+            this.ScannBox.TabStop = false;
+            this.ScannBox.Text = "Lekérdezés";
             // 
             // StopFetchBtn
             // 
@@ -846,6 +696,7 @@
             this.StopFetchBtn.TabIndex = 3;
             this.StopFetchBtn.Text = "Leállítás";
             this.StopFetchBtn.UseVisualStyleBackColor = true;
+            this.StopFetchBtn.Click += new System.EventHandler(this.StopFetchBtn_Click);
             // 
             // StartFetchBtn
             // 
@@ -882,6 +733,7 @@
             // 
             // groupBox5
             // 
+            this.groupBox5.Controls.Add(this.RTSInvertCbx);
             this.groupBox5.Controls.Add(this.DisconnectBtn);
             this.groupBox5.Controls.Add(this.ConnectBtn);
             this.groupBox5.Controls.Add(this.Baud_Cbx);
@@ -898,7 +750,7 @@
             // DisconnectBtn
             // 
             this.DisconnectBtn.Enabled = false;
-            this.DisconnectBtn.Location = new System.Drawing.Point(489, 17);
+            this.DisconnectBtn.Location = new System.Drawing.Point(602, 17);
             this.DisconnectBtn.Name = "DisconnectBtn";
             this.DisconnectBtn.Size = new System.Drawing.Size(104, 23);
             this.DisconnectBtn.TabIndex = 5;
@@ -908,7 +760,7 @@
             // 
             // ConnectBtn
             // 
-            this.ConnectBtn.Location = new System.Drawing.Point(375, 17);
+            this.ConnectBtn.Location = new System.Drawing.Point(488, 17);
             this.ConnectBtn.Name = "ConnectBtn";
             this.ConnectBtn.Size = new System.Drawing.Size(104, 23);
             this.ConnectBtn.TabIndex = 4;
@@ -919,16 +771,16 @@
             // Baud_Cbx
             // 
             this.Baud_Cbx.FormattingEnabled = true;
-            this.Baud_Cbx.Location = new System.Drawing.Point(238, 19);
+            this.Baud_Cbx.Location = new System.Drawing.Point(199, 19);
             this.Baud_Cbx.Name = "Baud_Cbx";
-            this.Baud_Cbx.Size = new System.Drawing.Size(121, 21);
+            this.Baud_Cbx.Size = new System.Drawing.Size(74, 21);
             this.Baud_Cbx.TabIndex = 3;
             this.Baud_Cbx.SelectedIndexChanged += new System.EventHandler(this.Baud_Cbx_SelectedIndexChanged);
             // 
             // label29
             // 
             this.label29.AutoSize = true;
-            this.label29.Location = new System.Drawing.Point(175, 22);
+            this.label29.Location = new System.Drawing.Point(136, 22);
             this.label29.Name = "label29";
             this.label29.Size = new System.Drawing.Size(57, 13);
             this.label29.TabIndex = 2;
@@ -939,7 +791,7 @@
             this.PortList_Cbx.FormattingEnabled = true;
             this.PortList_Cbx.Location = new System.Drawing.Point(42, 19);
             this.PortList_Cbx.Name = "PortList_Cbx";
-            this.PortList_Cbx.Size = new System.Drawing.Size(121, 21);
+            this.PortList_Cbx.Size = new System.Drawing.Size(74, 21);
             this.PortList_Cbx.TabIndex = 1;
             this.PortList_Cbx.SelectedIndexChanged += new System.EventHandler(this.PortList_Cbx_SelectedIndexChanged);
             // 
@@ -1037,6 +889,30 @@
             this.Value.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             this.Value.Width = 125;
             // 
+            // timer1
+            // 
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.label31.Location = new System.Drawing.Point(10, 18);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(120, 13);
+            this.label31.TabIndex = 4;
+            this.label31.Text = "Lekérdezési ciklus (mp):";
+            // 
+            // RTSInvertCbx
+            // 
+            this.RTSInvertCbx.AutoSize = true;
+            this.RTSInvertCbx.Location = new System.Drawing.Point(301, 21);
+            this.RTSInvertCbx.Name = "RTSInvertCbx";
+            this.RTSInvertCbx.Size = new System.Drawing.Size(92, 17);
+            this.RTSInvertCbx.TabIndex = 6;
+            this.RTSInvertCbx.Text = "Invertált RTS ";
+            this.RTSInvertCbx.UseVisualStyleBackColor = true;
+            this.RTSInvertCbx.CheckedChanged += new System.EventHandler(this.RTSInvertCbx_CheckedChanged);
+            // 
             // PufferTeszt
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1044,8 +920,8 @@
             this.ClientSize = new System.Drawing.Size(727, 622);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.groupBox5);
-            this.Controls.Add(this.groupBox3);
-            this.Controls.Add(this.groupBox4);
+            this.Controls.Add(this.ScannBox);
+            this.Controls.Add(this.StateBox);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Name = "PufferTeszt";
@@ -1055,15 +931,13 @@
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
-            this.groupBox4.ResumeLayout(false);
-            this.groupBox4.PerformLayout();
+            this.StateBox.ResumeLayout(false);
+            this.StateBox.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.NewCloseNud)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.NewOpenNud)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.NewStatusNud)).EndInit();
-            this.groupBox3.ResumeLayout(false);
-            this.groupBox3.PerformLayout();
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
+            this.ScannBox.ResumeLayout(false);
+            this.ScannBox.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.FetchTimeNud)).EndInit();
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
@@ -1098,7 +972,7 @@
         private System.Windows.Forms.TextBox ActualTFelsoTxb;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label label12;
-        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.GroupBox StateBox;
         private System.Windows.Forms.NumericUpDown NewStatusNud;
         private System.Windows.Forms.TextBox ActualStatusTxb;
         private System.Windows.Forms.Label label20;
@@ -1118,7 +992,7 @@
         private System.Windows.Forms.Label label26;
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.Label label23;
-        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.GroupBox ScannBox;
         private System.Windows.Forms.Button StopFetchBtn;
         private System.Windows.Forms.Button StartFetchBtn;
         private System.Windows.Forms.NumericUpDown FetchTimeNud;
@@ -1140,24 +1014,13 @@
         private System.Windows.Forms.CheckBox FullNyitCbx;
         private System.Windows.Forms.CheckBox FullZarCbx;
         private System.Windows.Forms.Button BealllitBtn;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.CheckBox BelsoCbx;
-        private System.Windows.Forms.CheckBox ZarasCbx;
-        private System.Windows.Forms.CheckBox NyitasCbx;
-        private System.Windows.Forms.CheckBox SzelepStatCbx;
-        private System.Windows.Forms.CheckBox TKozepCbx;
-        private System.Windows.Forms.CheckBox TFelsoCbx;
-        private System.Windows.Forms.CheckBox TAlsoCbx;
-        private System.Windows.Forms.CheckBox TVisszaCbx;
-        private System.Windows.Forms.CheckBox VisszaCbx;
-        private System.Windows.Forms.CheckBox TEloreCbx;
-        private System.Windows.Forms.CheckBox EloreCbx;
-        private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.Label label27;
         private System.Windows.Forms.TextBox BelsoTxb;
         private System.Windows.Forms.Label label30;
         private System.Windows.Forms.Timer timer1;
         private System.IO.Ports.SerialPort serialPort1;
+        private System.Windows.Forms.Label label31;
+        private System.Windows.Forms.CheckBox RTSInvertCbx;
     }
 }
 

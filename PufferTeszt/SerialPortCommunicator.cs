@@ -17,14 +17,15 @@ namespace PufferTeszt
         private const char Delimiter = ';';
         private SerialPort serialPort;
         private ParamQueue<Parameter> parameters;
-        private bool isWaitingForResponse = false;
         private AutoResetEvent responseWaiter;
         private readonly CancellationToken cancellationToken;
         private readonly CancellationTokenSource cts;
 
+        public bool RTSInvert { get; set; }
+
         public SerialPortCommunicator(
             SerialPort port, 
-            ParamQueue<Parameter> parameters, 
+            ParamQueue<Parameter> parameters,
             CancellationToken cancellationToken)
         {
             this.cancellationToken = cancellationToken;
@@ -34,7 +35,10 @@ namespace PufferTeszt
            // parameters.AddParameterEvent +=  OnAddParameter;
             serialPort.DataReceived += OnDataReceived;
             responseWaiter = new AutoResetEvent(false);
+            RTSInvert = false;
         }
+        
+       // public void SetRTSInver(bool isInvert) => RTSInvert = isInvert;
 
         public void StartCommunication()
             => Task.Run(() => ProcessParameterItem(cts.Token));
@@ -79,12 +83,11 @@ namespace PufferTeszt
                         {
                             var parameter = parameters.Dequeue();
                             var localeTask = new TaskCompletionSource<string>();
-                            isWaitingForResponse = true;
                             // elküldjük a parancsot...
                             byte[] data = Encoding.ASCII.GetBytes(parameter.Param);
-                            serialPort.RtsEnable = true;
+                            serialPort.RtsEnable = RTSInvert ? false : true;
                             serialPort.Write(data, 0, data.Length);
-                            serialPort.RtsEnable = false;
+                            serialPort.RtsEnable = RTSInvert ? true : false;
                             DataSendedEvent?.Invoke(this, parameter.Param);
                             responseWaiter.WaitOne();
                         }

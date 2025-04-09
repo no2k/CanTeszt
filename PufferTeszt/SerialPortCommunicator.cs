@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PufferTeszt
@@ -14,21 +15,33 @@ namespace PufferTeszt
         private const char StartBit = '#';
         private const char EndBit = '!';
         private const char Delimiter = ';';
-        private const string Response = "RSP";
-        private const string GetData = "GET";
-        private const string SETData = "SET";
         private SerialPort serialPort;
         private ParamQueue<Parameter> parameters;
-        private TaskCompletionSource<string> responseTcs; // A válasz megvárásához
         private bool isWaitingForResponse = false;
+        private AutoResetEvent responseWaiter;
+        private readonly CancellationToken cancellationToken;
+        private readonly CancellationTokenSource cts;
 
-        public SerialPortCommunicator(SerialPort port, ParamQueue<Parameter> parameters)
+        public SerialPortCommunicator(
+            SerialPort port, 
+            ParamQueue<Parameter> parameters, 
+            CancellationToken cancellationToken)
         {
+            this.cancellationToken = cancellationToken;
+            cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             serialPort = port;
             this.parameters = parameters;
-            parameters.AddParameterEvent += OnAddParameter;
+           // parameters.AddParameterEvent +=  OnAddParameter;
             serialPort.DataReceived += OnDataReceived;
-            responseTcs = new TaskCompletionSource<string>();
+            responseWaiter = new AutoResetEvent(false);
+        }
+
+        public void StartCommunication()
+            => Task.Run(() => ProcessParameterItem(cts.Token));
+
+        public void StopCommunication()
+        {
+            cts.Cancel(); 
         }
 
         private void OnDataReceived(object sender, SerialDataReceivedEventArgs e)
@@ -39,48 +52,33 @@ namespace PufferTeszt
                 if (receivedData.Length == 11 && receivedData[0] == '#' && receivedData[10] == '!')
                 {
                     ProcessResponse(receivedData);
-                    if (isWaitingForResponse)
-                    {
-                        if (!responseTcs.Task.IsCompleted)
-                        {
-                            responseTcs.SetResult(receivedData);
-                        }
-                        isWaitingForResponse = false;
-                    }
                     receivedData = null;
                 }
-                // Ha nem teljes a válasz, tároljuk vagy dolgozzuk fel részlegesen
-                // A következő DataReceived eseménykor folytatjuk
+                responseWaiter.Set();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Hiba a soros portról érkező adatok feldolgozása során: {ex.Message}");
-                if (isWaitingForResponse)
-                {
-                    responseTcs.SetException(ex);
-                    isWaitingForResponse = false;
-                }
+                responseWaiter.Reset();
             }
         }
 
-        private async void OnAddParameter(object sender, EventArgs e)
+        private void OnAddParameter(object sender, EventArgs e)
         {
-            await ProcessParameterItem();
+           // ProcessParameterItem();
         }
 
-        private async Task ProcessParameterItem()
+        private void ProcessParameterItem(CancellationToken cancellation)
         {
             if (serialPort.IsOpen)
             {
                 try
                 {
-                    while (parameters.Count > 0)
+                    while (!cancellation.IsCancellationRequested)
                     {
-                        if (!isWaitingForResponse)
+                        if (parameters.Count > 0)
                         {
                             var parameter = parameters.Dequeue();
                             var localeTask = new TaskCompletionSource<string>();
-                            responseTcs = localeTask;
                             isWaitingForResponse = true;
                             // elküldjük a parancsot...
                             byte[] data = Encoding.ASCII.GetBytes(parameter.Param);
@@ -88,21 +86,18 @@ namespace PufferTeszt
                             serialPort.Write(data, 0, data.Length);
                             serialPort.RtsEnable = false;
                             DataSendedEvent?.Invoke(this, parameter.Param);
+                            responseWaiter.WaitOne();
                         }
-                        // várunk a válaszra...
-                        //Task<string> responseTask = responseTcs.Task;
-                        Task timeoutTask = Task.Delay(10000); // 5 másodperces timeout
-                       // Task completedTask = await Task.WhenAny(responseTask, timeoutTask);
-                        Task completedTask = await Task.WhenAny(responseTcs.Task, timeoutTask);
-                       // várakozni kell
-                        isWaitingForResponse = false;
+                        responseWaiter.Reset();
+                        Task.Delay(1000).Wait(); // várunk egy kicsit, hogy a sorban lévő parancsok feldolgozódjanak
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Hiba a soros porti kommunikáció során: {ex.Message}");
-                    isWaitingForResponse = false;
+                    responseWaiter.Reset();
+                    throw new Exception("Hiba történt a válasz feldolgozása közben.", ex);
                 }
+
             }
         }
 

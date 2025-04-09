@@ -9,6 +9,7 @@ using System.IO.Ports;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 //using SharedModels.Models;
@@ -18,6 +19,7 @@ namespace PufferTeszt
     {
         private ParamQueue<Parameter> parameters = new ParamQueue<Parameter>();
         private SerialPortCommunicator communicator;
+       
         private List<int> BaudRates { get; } = new List<int>() { 110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, 115200 };
         private const char StartBit = '#';
         private const char EndBit = '!';
@@ -26,7 +28,7 @@ namespace PufferTeszt
         private const string GetData = "GET";
         private const string SETData = "SET";
         private int dataIndex = 0;
-        string receiveBuffer = "";
+       
         int lastStatus = 0;
         int lastOpened = 0;
         int lastClosed = 0;
@@ -37,11 +39,13 @@ namespace PufferTeszt
             InitializeComponent();
             try
             {
+
                 InitializePort();
-                communicator = new SerialPortCommunicator(serialPort1, parameters);
+                communicator = new SerialPortCommunicator(serialPort1, parameters, default);
                 communicator.ResponseReceivedEvent += ProcessingResponseData;
                 communicator.DataSendedEvent += OnDataSended;
-                nfi.NumberDecimalDigits = 2; 
+                nfi.NumberDecimalDigits = 2;
+                
             }
             catch (Exception ex)
             {
@@ -89,6 +93,7 @@ namespace PufferTeszt
                 serialPort1.Open();
                 ConnectBtn.Enabled = false;
                 DisconnectBtn.Enabled = true;
+                communicator.StartCommunication();
             }
             catch (Exception ex)
             {
@@ -108,6 +113,7 @@ namespace PufferTeszt
                 serialPort1.Close();
                 DisconnectBtn.Enabled = false;
                 ConnectBtn.Enabled = true;
+                communicator.StopCommunication();
             }
             catch (Exception ex)
             {
@@ -119,6 +125,7 @@ namespace PufferTeszt
         {
             try
             {
+                communicator.StopCommunication();
                 serialPort1.Close();
                 serialPort1 = null;
             }
@@ -139,6 +146,7 @@ namespace PufferTeszt
                 MessageBox.Show(ex.Message);
             }
         }
+      
         private void ProcessingResponseData(object sender, string response)
         {
             try
@@ -168,6 +176,7 @@ namespace PufferTeszt
 
         private void RefreshDGVBoard(string data)
             => IOTableViewDGV.Rows.Add(ConvertToDGViewParams(DateTime.Now, data, ++dataIndex));
+     
         private void RefreshDashboard(string data)
         {
             if (string.IsNullOrEmpty(data)) { return; };
@@ -193,9 +202,9 @@ namespace PufferTeszt
                             break;
                         case "P7": BelsoTxb.Text = dataArr[2];
                             break;
-                        case "KI": ActualOpenTxb.Text = dataArr[2];
+                        case "KI": ActualCloseTxb.Text = dataArr[2];
                             break;
-                        case "BE": ActualCloseTxb.Text = dataArr[2];
+                        case "BE": ActualOpenTxb.Text = dataArr[2];
                             break;
                         case "ST": ActualStatusTxb.Text = dataArr[2];
                             break;
@@ -212,7 +221,6 @@ namespace PufferTeszt
                 .Split(Delimiter);
         }
 
-        // FIXME: át kell dolgozni!!
         private void BealllitBtn_Click(object sender, EventArgs e)
         {
             try
@@ -252,23 +260,6 @@ namespace PufferTeszt
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
-            }
-        }
-
-        private void SendData(string data)
-        {
-            try
-            {
-                if (serialPort1.IsOpen)
-                {
-                    serialPort1.RtsEnable = true;
-                    serialPort1.Write(data);
-                    serialPort1.RtsEnable = false;
-                }
-            }
-            catch (Exception)
-            {
-                throw;
             }
         }
 

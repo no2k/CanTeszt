@@ -12,7 +12,9 @@ namespace PufferTeszt
         public event EventHandler AddParameterEvent;
        
         public event EventHandler RemoveParameterEvent;
-       
+
+        public event EventHandler ClearParameterEvent;
+
         public int Count => parameters.Count;
        
         private Queue<T> parameters = new Queue<T>();
@@ -22,6 +24,12 @@ namespace PufferTeszt
            // parameter.QIndex = parameters.Count + 1;
             parameters.Enqueue(parameter);
             AddParameterEvent?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void ClearParameters()
+        {
+            parameters.Clear();
+            ClearParameterEvent?.Invoke(this, EventArgs.Empty);
         }
 
         public T Dequeue()

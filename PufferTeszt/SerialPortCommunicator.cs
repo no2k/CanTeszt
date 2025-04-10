@@ -10,6 +10,7 @@ namespace PufferTeszt
 {
     public class SerialPortCommunicator
     {
+        public event EventHandler<string> RawDataReceivedEvent;
         public event EventHandler<string> ResponseReceivedEvent; // esemény a válaszhoz
         public event EventHandler<string> DataSendedEvent;
         private const char StartBit = '#';
@@ -18,36 +19,41 @@ namespace PufferTeszt
         private SerialPort serialPort;
         private ParamQueue<Parameter> parameters;
         private AutoResetEvent responseWaiter;
-        private readonly CancellationToken cancellationToken;
-        private readonly CancellationTokenSource cts;
+        private CancellationToken cancellationToken;
+        private CancellationTokenSource cts;
 
         public bool RTSInvert { get; set; }
 
         public SerialPortCommunicator(
             SerialPort port, 
-            ParamQueue<Parameter> parameters,
-            CancellationToken cancellationToken)
+            ParamQueue<Parameter> parameters)
         {
-            this.cancellationToken = cancellationToken;
-            cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             serialPort = port;
             this.parameters = parameters;
            // parameters.AddParameterEvent +=  OnAddParameter;
             serialPort.DataReceived += OnDataReceived;
             responseWaiter = new AutoResetEvent(false);
             RTSInvert = false;
+            this.parameters.ClearParameterEvent += OnClearSendingData;
         }
         
        // public void SetRTSInver(bool isInvert) => RTSInvert = isInvert;
 
         public void StartCommunication()
-            => Task.Run(() => ProcessParameterItem(cts.Token));
+        {
+            cancellationToken = new CancellationToken();
+            cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            Task.Run(() => ProcessParameterItem(cts.Token)); 
+        }
 
         public void StopCommunication()
         {
             cts.Cancel(); 
+            cts.Dispose();
         }
 
+        private void OnClearSendingData(object sender, EventArgs e)
+            =>responseWaiter.Reset();
         private void OnDataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             try
@@ -56,13 +62,18 @@ namespace PufferTeszt
                 if (receivedData.Length == 11 && receivedData[0] == '#' && receivedData[10] == '!')
                 {
                     ProcessResponse(receivedData);
-                    receivedData = null;
                 }
+                else
+                {
+                    RawDataEventCalling(receivedData);
+                }
+                receivedData = null;
                 responseWaiter.Set();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 responseWaiter.Reset();
+                throw;
             }
         }
 
@@ -109,5 +120,9 @@ namespace PufferTeszt
             ResponseReceivedEvent?.Invoke(this, response);
         }
        
+        private void RawDataEventCalling(string rawData)
+        {
+            RawDataReceivedEvent?.Invoke(this, rawData);
+        }
     }
 }

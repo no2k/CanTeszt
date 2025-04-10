@@ -40,9 +40,10 @@ namespace PufferTeszt
             try
             {
                 InitializePort();
-                communicator = new SerialPortCommunicator(serialPort1, parameters, default);
+                communicator = new SerialPortCommunicator(serialPort1, parameters);
                 communicator.ResponseReceivedEvent += ProcessingResponseData;
                 communicator.DataSendedEvent += OnDataSended;
+                communicator.RawDataReceivedEvent += OnReceivedRawData;
                 nfi.NumberDecimalDigits = 2;
             }
             catch (Exception ex)
@@ -91,6 +92,9 @@ namespace PufferTeszt
                 Baud_Cbx.Enabled = false;
                 StateBox.Enabled = true;
                 ScannBox.Enabled = true;
+                IOTableViewDGV.Rows.Clear();
+                ReceivedDataTbx.Clear();
+                dataIndex = 0;
             }
             catch (Exception ex)
             {
@@ -107,10 +111,12 @@ namespace PufferTeszt
         {
             try
             {
+                timer1.Enabled = false;
                 serialPort1.Close();
                 DisconnectBtn.Enabled = false;
                 ConnectBtn.Enabled = true;
                 communicator.StopCommunication();
+                parameters.ClearParameters();
                 PortList_Cbx.Enabled = true;
                 Baud_Cbx.Enabled = true;
                 StateBox.Enabled = false;
@@ -147,7 +153,16 @@ namespace PufferTeszt
                 MessageBox.Show(ex.Message);
             }
         }
-      
+
+        private void OnReceivedRawData(object sender, string rawData)
+        {
+           this.Invoke(new Action<string>(RefreshReceivedRawData), rawData);
+        }
+
+        private void RefreshReceivedRawData(string rawData)
+        {
+            ReceivedDataTbx.Text += $"{rawData} -> {string.Join(" ", rawData.Select(x => ((int)x).ToString("X2")))}{Environment.NewLine}";
+        }
         private void ProcessingResponseData(object sender, string response)
         {
             try
@@ -166,7 +181,7 @@ namespace PufferTeszt
             try
             {
                  string[] dataArr = SeparateData(data);
-                 return new object[] { index, time.ToString(), data, dataArr[0], dataArr[1], dataArr[2]};            
+                 return new object[] { index, time.ToString("f"), data, dataArr[0], dataArr[1], dataArr[2]};            
             }
             catch (Exception ex)
             {

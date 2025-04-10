@@ -79,10 +79,12 @@
             this.ActualStatusTxb = new System.Windows.Forms.TextBox();
             this.label20 = new System.Windows.Forms.Label();
             this.ScannBox = new System.Windows.Forms.GroupBox();
+            this.label31 = new System.Windows.Forms.Label();
             this.StopFetchBtn = new System.Windows.Forms.Button();
             this.StartFetchBtn = new System.Windows.Forms.Button();
             this.FetchTimeNud = new System.Windows.Forms.NumericUpDown();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.RTSInvertCbx = new System.Windows.Forms.CheckBox();
             this.DisconnectBtn = new System.Windows.Forms.Button();
             this.ConnectBtn = new System.Windows.Forms.Button();
             this.Baud_Cbx = new System.Windows.Forms.ComboBox();
@@ -99,8 +101,7 @@
             this.Value = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
-            this.label31 = new System.Windows.Forms.Label();
-            this.RTSInvertCbx = new System.Windows.Forms.CheckBox();
+            this.ReceivedDataTbx = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.StateBox.SuspendLayout();
@@ -688,6 +689,15 @@
             this.ScannBox.TabStop = false;
             this.ScannBox.Text = "Lekérdezés";
             // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.label31.Location = new System.Drawing.Point(10, 18);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(120, 13);
+            this.label31.TabIndex = 4;
+            this.label31.Text = "Lekérdezési ciklus (mp):";
+            // 
             // StopFetchBtn
             // 
             this.StopFetchBtn.Location = new System.Drawing.Point(300, 12);
@@ -746,6 +756,17 @@
             this.groupBox5.TabIndex = 9;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Kapcsolat";
+            // 
+            // RTSInvertCbx
+            // 
+            this.RTSInvertCbx.AutoSize = true;
+            this.RTSInvertCbx.Location = new System.Drawing.Point(301, 21);
+            this.RTSInvertCbx.Name = "RTSInvertCbx";
+            this.RTSInvertCbx.Size = new System.Drawing.Size(92, 17);
+            this.RTSInvertCbx.TabIndex = 6;
+            this.RTSInvertCbx.Text = "Invertált RTS ";
+            this.RTSInvertCbx.UseVisualStyleBackColor = true;
+            this.RTSInvertCbx.CheckedChanged += new System.EventHandler(this.RTSInvertCbx_CheckedChanged);
             // 
             // DisconnectBtn
             // 
@@ -893,31 +914,20 @@
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // label31
+            // ReceivedDataTbx
             // 
-            this.label31.AutoSize = true;
-            this.label31.Location = new System.Drawing.Point(10, 18);
-            this.label31.Name = "label31";
-            this.label31.Size = new System.Drawing.Size(120, 13);
-            this.label31.TabIndex = 4;
-            this.label31.Text = "Lekérdezési ciklus (mp):";
-            // 
-            // RTSInvertCbx
-            // 
-            this.RTSInvertCbx.AutoSize = true;
-            this.RTSInvertCbx.Location = new System.Drawing.Point(301, 21);
-            this.RTSInvertCbx.Name = "RTSInvertCbx";
-            this.RTSInvertCbx.Size = new System.Drawing.Size(92, 17);
-            this.RTSInvertCbx.TabIndex = 6;
-            this.RTSInvertCbx.Text = "Invertált RTS ";
-            this.RTSInvertCbx.UseVisualStyleBackColor = true;
-            this.RTSInvertCbx.CheckedChanged += new System.EventHandler(this.RTSInvertCbx_CheckedChanged);
+            this.ReceivedDataTbx.Location = new System.Drawing.Point(342, 294);
+            this.ReceivedDataTbx.Multiline = true;
+            this.ReceivedDataTbx.Name = "ReceivedDataTbx";
+            this.ReceivedDataTbx.Size = new System.Drawing.Size(380, 105);
+            this.ReceivedDataTbx.TabIndex = 11;
             // 
             // PufferTeszt
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(727, 622);
+            this.Controls.Add(this.ReceivedDataTbx);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.ScannBox);
@@ -944,6 +954,7 @@
             this.groupBox6.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.IOTableViewDGV)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -1021,6 +1032,7 @@
         private System.IO.Ports.SerialPort serialPort1;
         private System.Windows.Forms.Label label31;
         private System.Windows.Forms.CheckBox RTSInvertCbx;
+        private System.Windows.Forms.TextBox ReceivedDataTbx;
     }
 }
 

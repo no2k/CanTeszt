@@ -132,7 +132,10 @@ namespace PufferTeszt
         {
             try
             {
-                communicator.StopCommunication();
+                if (communicator.IsRuningCommunication)
+                {
+                    communicator.StopCommunication();
+                }
                 serialPort1.Close();
                 serialPort1 = null;
             }
@@ -163,6 +166,7 @@ namespace PufferTeszt
         {
             ReceivedDataTbx.Text += $"{rawData} -> {string.Join(" ", rawData.Select(x => ((int)x).ToString("X2")))}{Environment.NewLine}";
         }
+      
         private void ProcessingResponseData(object sender, string response)
         {
             try
@@ -181,7 +185,15 @@ namespace PufferTeszt
             try
             {
                  string[] dataArr = SeparateData(data);
-                 return new object[] { index, time.ToString("f"), data, dataArr[0], dataArr[1], dataArr[2]};            
+                 return new object[] 
+                 { 
+                     index, 
+                     time.ToString("yyyy.MM.dd.-HH:mm:ss.fff"), 
+                     data, 
+                     dataArr[0], 
+                     dataArr[1], 
+                     dataArr[2]
+                 };            
             }
             catch (Exception ex)
             {
@@ -330,6 +342,7 @@ namespace PufferTeszt
             StopFetchBtn.Enabled = true;
             timer1.Start();
         }
+       
         private void timer1_Tick(object sender, EventArgs e)
         {
             var data = GenerateSendingData(GetData, "P0");

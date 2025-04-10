@@ -21,6 +21,7 @@ namespace PufferTeszt
         private AutoResetEvent responseWaiter;
         private CancellationToken cancellationToken;
         private CancellationTokenSource cts;
+        public bool IsRuningCommunication { get; private set; } = false;
 
         public bool RTSInvert { get; set; }
 
@@ -41,6 +42,7 @@ namespace PufferTeszt
 
         public void StartCommunication()
         {
+            IsRuningCommunication = true;
             cancellationToken = new CancellationToken();
             cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             Task.Run(() => ProcessParameterItem(cts.Token)); 
@@ -48,6 +50,7 @@ namespace PufferTeszt
 
         public void StopCommunication()
         {
+            IsRuningCommunication = false;
             cts.Cancel(); 
             cts.Dispose();
         }

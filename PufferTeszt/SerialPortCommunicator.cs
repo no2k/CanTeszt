@@ -13,6 +13,7 @@ namespace PufferTeszt
         public event EventHandler<string> RawDataReceivedEvent;
         public event EventHandler<string> ResponseReceivedEvent; // esemény a válaszhoz
         public event EventHandler<string> DataSendedEvent;
+        public event EventHandler<string> MessageSendingEvent; // esemény a válaszhoz
         private const char StartBit = '#';
         private const char EndBit = '!';
         private const char Delimiter = ';';
@@ -21,15 +22,19 @@ namespace PufferTeszt
         private AutoResetEvent responseWaiter;
         private CancellationToken cancellationToken;
         private CancellationTokenSource cts;
+        private string dataBuffer = string.Empty;
+        string receivedData = string.Empty;
         public bool IsRuningCommunication { get; private set; } = false;
 
         public bool RTSInvert { get; set; }
 
         public SerialPortCommunicator(
             SerialPort port, 
-            ParamQueue<Parameter> parameters)
+            ParamQueue<Parameter> parameters,
+            bool isRTYInverting = false)
         {
             serialPort = port;
+            serialPort.RtsEnable = isRTYInverting;
             this.parameters = parameters;
            // parameters.AddParameterEvent +=  OnAddParameter;
             serialPort.DataReceived += OnDataReceived;
@@ -57,21 +62,35 @@ namespace PufferTeszt
 
         private void OnClearSendingData(object sender, EventArgs e)
             =>responseWaiter.Reset();
+     
         private void OnDataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             try
             {
-                string receivedData = serialPort.ReadExisting();
-                if (receivedData.Length == 11 && receivedData[0] == '#' && receivedData[10] == '!')
+                var rawRdata = serialPort.ReadExisting();
+                int startindex = rawRdata.IndexOf(StartBit);
+                int endindex = rawRdata.IndexOf(EndBit);
+                if (startindex != -1)
                 {
-                    ProcessResponse(receivedData);
+                    receivedData += rawRdata.Substring(startindex);
                 }
-                else
+                else if ( receivedData.Length > 0 && receivedData.Length < 11 && endindex != -1)
                 {
-                    RawDataEventCalling(receivedData);
+                    var lenght = rawRdata.Length - endindex;
+                    receivedData += rawRdata.Substring(0 , lenght);
                 }
-                receivedData = null;
-                responseWaiter.Set();
+                MessageSendingEventCalling("Adat méret: " + receivedData.Length);
+                if (receivedData.Length >= 11)
+                {
+                    if (receivedData[0] == '#' && receivedData[10] == '!')
+                    {
+                        ProcessResponse(receivedData);
+                        receivedData = string.Empty;
+                        responseWaiter.Set();
+                    }
+                    receivedData = string.Empty;
+                }
+                RawDataEventCalling(receivedData.ToString());
             }
             catch (Exception)
             {
@@ -114,7 +133,6 @@ namespace PufferTeszt
                     responseWaiter.Reset();
                     throw new Exception("Hiba történt a válasz feldolgozása közben.", ex);
                 }
-
             }
         }
 
@@ -126,6 +144,11 @@ namespace PufferTeszt
         private void RawDataEventCalling(string rawData)
         {
             RawDataReceivedEvent?.Invoke(this, rawData);
+        }
+
+        private void MessageSendingEventCalling(string message)
+        {
+            MessageSendingEvent?.Invoke(this, message);
         }
     }
 }

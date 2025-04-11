@@ -102,6 +102,7 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
             this.ReceivedDataTbx = new System.Windows.Forms.TextBox();
+            this.MessageTbx = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.StateBox.SuspendLayout();
@@ -831,7 +832,7 @@
             this.groupBox6.Controls.Add(this.IOTableViewDGV);
             this.groupBox6.Location = new System.Drawing.Point(3, 414);
             this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Size = new System.Drawing.Size(719, 198);
+            this.groupBox6.Size = new System.Drawing.Size(719, 196);
             this.groupBox6.TabIndex = 10;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Kommunikáció";
@@ -850,7 +851,7 @@
             this.IOTableViewDGV.Location = new System.Drawing.Point(3, 16);
             this.IOTableViewDGV.Name = "IOTableViewDGV";
             this.IOTableViewDGV.RowHeadersWidth = 51;
-            this.IOTableViewDGV.Size = new System.Drawing.Size(713, 179);
+            this.IOTableViewDGV.Size = new System.Drawing.Size(713, 177);
             this.IOTableViewDGV.TabIndex = 0;
             // 
             // Id
@@ -919,14 +920,24 @@
             this.ReceivedDataTbx.Location = new System.Drawing.Point(342, 294);
             this.ReceivedDataTbx.Multiline = true;
             this.ReceivedDataTbx.Name = "ReceivedDataTbx";
+            this.ReceivedDataTbx.ReadOnly = true;
+            this.ReceivedDataTbx.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.ReceivedDataTbx.Size = new System.Drawing.Size(380, 105);
             this.ReceivedDataTbx.TabIndex = 11;
+            // 
+            // MessageTbx
+            // 
+            this.MessageTbx.Location = new System.Drawing.Point(3, 613);
+            this.MessageTbx.Name = "MessageTbx";
+            this.MessageTbx.Size = new System.Drawing.Size(716, 20);
+            this.MessageTbx.TabIndex = 12;
             // 
             // PufferTeszt
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(727, 622);
+            this.ClientSize = new System.Drawing.Size(727, 639);
+            this.Controls.Add(this.MessageTbx);
             this.Controls.Add(this.ReceivedDataTbx);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.groupBox5);
@@ -1033,6 +1044,7 @@
         private System.Windows.Forms.Label label31;
         private System.Windows.Forms.CheckBox RTSInvertCbx;
         private System.Windows.Forms.TextBox ReceivedDataTbx;
+        private System.Windows.Forms.TextBox MessageTbx;
     }
 }
 

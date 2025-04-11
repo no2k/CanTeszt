@@ -44,6 +44,7 @@ namespace PufferTeszt
                 communicator.ResponseReceivedEvent += ProcessingResponseData;
                 communicator.DataSendedEvent += OnDataSended;
                 communicator.RawDataReceivedEvent += OnReceivedRawData;
+                communicator.MessageSendingEvent += OnRefreshStatusText;
                 nfi.NumberDecimalDigits = 2;
             }
             catch (Exception ex)
@@ -95,11 +96,22 @@ namespace PufferTeszt
                 IOTableViewDGV.Rows.Clear();
                 ReceivedDataTbx.Clear();
                 dataIndex = 0;
+                communicator.RTSInvert = RTSInvertCbx.Checked;
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
+        }
+
+        private void OnRefreshStatusText(object sender, string text)
+        {
+            this.Invoke(new Action<string>(OnRefreshStatusText),text) ;
+        }
+
+        private void OnRefreshStatusText(string text)
+        {
+           MessageTbx.Text = text;
         }
 
         private void Baud_Cbx_SelectedIndexChanged(object sender, EventArgs e)
@@ -164,7 +176,7 @@ namespace PufferTeszt
 
         private void RefreshReceivedRawData(string rawData)
         {
-            ReceivedDataTbx.Text += $"{rawData} -> {string.Join(" ", rawData.Select(x => ((int)x).ToString("X2")))}{Environment.NewLine}";
+            ReceivedDataTbx.AppendText($"{rawData} -> {string.Join(" ", rawData.Select(x => ((int)x).ToString("X2")))}{Environment.NewLine}");
         }
       
         private void ProcessingResponseData(object sender, string response)

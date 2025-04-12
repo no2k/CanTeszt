@@ -30,11 +30,9 @@ namespace PufferTeszt
 
         public SerialPortCommunicator(
             SerialPort port, 
-            ParamQueue<Parameter> parameters,
-            bool isRTYInverting = false)
+            ParamQueue<Parameter> parameters)
         {
             serialPort = port;
-            serialPort.RtsEnable = isRTYInverting;
             this.parameters = parameters;
            // parameters.AddParameterEvent +=  OnAddParameter;
             serialPort.DataReceived += OnDataReceived;
@@ -48,6 +46,8 @@ namespace PufferTeszt
         public void StartCommunication()
         {
             IsRuningCommunication = true;
+            serialPort.RtsEnable = RTSInvert ? true : false;
+            
             cancellationToken = new CancellationToken();
             cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             Task.Run(() => ProcessParameterItem(cts.Token)); 
@@ -68,21 +68,25 @@ namespace PufferTeszt
             try
             {
                 var rawRdata = serialPort.ReadExisting();
-                int startindex = rawRdata.IndexOf(StartBit);
-                int endindex = rawRdata.IndexOf(EndBit);
-                if (startindex != -1)
-                {
-                    receivedData += rawRdata.Substring(startindex);
-                }
-                else if ( receivedData.Length > 0 && receivedData.Length < 11 && endindex != -1)
-                {
-                    var lenght = rawRdata.Length - endindex;
-                    receivedData += rawRdata.Substring(0 , lenght);
-                }
-                MessageSendingEventCalling("Adat méret: " + receivedData.Length);
+                RawDataEventCalling(rawRdata);
+                receivedData += rawRdata;
+                // int startindex = rawRdata.IndexOf(StartBit);
+                // if (startindex != -1)
+                // {
+                //     receivedData += rawRdata.Substring(startindex);
+                // }
+                // else 
                 if (receivedData.Length >= 11)
                 {
-                    if (receivedData[0] == '#' && receivedData[10] == '!')
+                    int startindex = receivedData.IndexOf(StartBit);
+                    int endindex = receivedData.IndexOf(EndBit);
+                    var lenght = receivedData.Length - endindex;
+                    string data = receivedData.Substring(startindex , endindex);
+                //}
+                //MessageSendingEventCalling("Adat méret: " + receivedData.Length);
+                //if (receivedData.Length >= 11)
+                //{
+                    if (receivedData[0] == StartBit && receivedData[10] == EndBit)
                     {
                         ProcessResponse(receivedData);
                         receivedData = string.Empty;
@@ -90,7 +94,6 @@ namespace PufferTeszt
                     }
                     receivedData = string.Empty;
                 }
-                RawDataEventCalling(receivedData.ToString());
             }
             catch (Exception)
             {
@@ -117,15 +120,10 @@ namespace PufferTeszt
                             var parameter = parameters.Dequeue();
                             var localeTask = new TaskCompletionSource<string>();
                             // elküldjük a parancsot...
-                            byte[] data = Encoding.ASCII.GetBytes(parameter.Param);
-                            serialPort.RtsEnable = RTSInvert ? false : true;
-                            serialPort.Write(data, 0, data.Length);
-                            serialPort.RtsEnable = RTSInvert ? true : false;
-                            DataSendedEvent?.Invoke(this, parameter.Param);
+                            SendingData(parameter.Param);
                             responseWaiter.WaitOne();
                         }
                         responseWaiter.Reset();
-                        Task.Delay(1000).Wait(); // várunk egy kicsit, hogy a sorban lévő parancsok feldolgozódjanak
                     }
                 }
                 catch (Exception ex)
@@ -133,6 +131,37 @@ namespace PufferTeszt
                     responseWaiter.Reset();
                     throw new Exception("Hiba történt a válasz feldolgozása közben.", ex);
                 }
+            }
+        }
+
+        public void SendingData(string sending)
+        {
+            try
+            {
+                if (serialPort.IsOpen)
+                {
+                    // byte[] data = Encoding.ASCII.GetBytes(sending);
+                    serialPort.RtsEnable = RTSInvert ? false : true;
+                    // RawDataEventCalling($"RTS {(serialPort.RtsEnable ? "Write data" : "Read data")}{Environment.NewLine}");
+                    Thread.Sleep(2);
+                    var byteArr = Encoding.ASCII.GetBytes(sending);
+                    for (var i = 0; i < byteArr.Length; i++)
+                    {
+                        serialPort.BaseStream.WriteByte(byteArr[i]);
+                    }
+                    //serialPort.Write(sending.ToArray(), 0, sending.Length);
+                    Thread.Sleep(2);
+                   
+                    // RawDataEventCalling($"RTS {(serialPort.RtsEnable ? "Write data" : "Read data")}{Environment.NewLine}");
+                    // Thread.Sleep(5);
+                    serialPort.RtsEnable = RTSInvert ? true : false;
+                    // RawDataEventCalling($"RTS {(serialPort.RtsEnable ? "Write data" : "Read data")}{Environment.NewLine}");
+                    DataSendedEvent?.Invoke(this, sending);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 

@@ -86,6 +86,8 @@ namespace PufferTeszt
             try
             {
                 serialPort1.Open();
+                //serialPort1.RtsEnable= RTSInvertCbx.Checked ? true : false;
+                communicator.RTSInvert = RTSInvertCbx.Checked;
                 ConnectBtn.Enabled = false;
                 DisconnectBtn.Enabled = true;
                 communicator.StartCommunication();
@@ -97,6 +99,7 @@ namespace PufferTeszt
                 ReceivedDataTbx.Clear();
                 dataIndex = 0;
                 communicator.RTSInvert = RTSInvertCbx.Checked;
+                RTSInvertCbx.Enabled = false;
             }
             catch (Exception ex)
             {
@@ -133,6 +136,8 @@ namespace PufferTeszt
                 Baud_Cbx.Enabled = true;
                 StateBox.Enabled = false;
                 ScannBox.Enabled = false;
+                RTSInvertCbx.Enabled = true;
+
             }
             catch (Exception ex)
             {
@@ -391,6 +396,21 @@ namespace PufferTeszt
         private void RTSInvertCbx_CheckedChanged(object sender, EventArgs e)
         {
             communicator.RTSInvert = RTSInvertCbx.Checked;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(DirectDataTxb.Text))
+                {
+                    communicator.SendingData(DirectDataTxb.Text);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message,"Közvetlen adatküldés hiba");
+            }
         }
     }
 }

@@ -103,6 +103,8 @@
             this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
             this.ReceivedDataTbx = new System.Windows.Forms.TextBox();
             this.MessageTbx = new System.Windows.Forms.TextBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.DirectDataTxb = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.StateBox.SuspendLayout();
@@ -830,7 +832,7 @@
             // 
             this.groupBox6.BackColor = System.Drawing.SystemColors.ControlLight;
             this.groupBox6.Controls.Add(this.IOTableViewDGV);
-            this.groupBox6.Location = new System.Drawing.Point(3, 414);
+            this.groupBox6.Location = new System.Drawing.Point(3, 437);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Size = new System.Drawing.Size(719, 196);
             this.groupBox6.TabIndex = 10;
@@ -915,28 +917,51 @@
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // serialPort1
+            // 
+            this.serialPort1.RtsEnable = true;
+            // 
             // ReceivedDataTbx
             // 
-            this.ReceivedDataTbx.Location = new System.Drawing.Point(342, 294);
+            this.ReceivedDataTbx.Location = new System.Drawing.Point(342, 306);
             this.ReceivedDataTbx.Multiline = true;
             this.ReceivedDataTbx.Name = "ReceivedDataTbx";
             this.ReceivedDataTbx.ReadOnly = true;
             this.ReceivedDataTbx.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.ReceivedDataTbx.Size = new System.Drawing.Size(380, 105);
+            this.ReceivedDataTbx.Size = new System.Drawing.Size(380, 93);
             this.ReceivedDataTbx.TabIndex = 11;
             // 
             // MessageTbx
             // 
-            this.MessageTbx.Location = new System.Drawing.Point(3, 613);
+            this.MessageTbx.Location = new System.Drawing.Point(3, 639);
             this.MessageTbx.Name = "MessageTbx";
             this.MessageTbx.Size = new System.Drawing.Size(716, 20);
             this.MessageTbx.TabIndex = 12;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(605, 405);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(117, 23);
+            this.button1.TabIndex = 13;
+            this.button1.Text = "Direkt küldés";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // DirectDataTxb
+            // 
+            this.DirectDataTxb.Location = new System.Drawing.Point(342, 408);
+            this.DirectDataTxb.Name = "DirectDataTxb";
+            this.DirectDataTxb.Size = new System.Drawing.Size(253, 20);
+            this.DirectDataTxb.TabIndex = 14;
             // 
             // PufferTeszt
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(727, 639);
+            this.ClientSize = new System.Drawing.Size(727, 671);
+            this.Controls.Add(this.DirectDataTxb);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.MessageTbx);
             this.Controls.Add(this.ReceivedDataTbx);
             this.Controls.Add(this.groupBox6);
@@ -1045,6 +1070,8 @@
         private System.Windows.Forms.CheckBox RTSInvertCbx;
         private System.Windows.Forms.TextBox ReceivedDataTbx;
         private System.Windows.Forms.TextBox MessageTbx;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.TextBox DirectDataTxb;
     }
 }
 

@@ -10,10 +10,10 @@ namespace PufferTeszt
 {
     public class SerialPortCommunicator
     {
-        public event EventHandler<string> RawDataReceivedEvent;
-        public event EventHandler<string> ResponseReceivedEvent; // esemény a válaszhoz
-        public event EventHandler<string> DataSendedEvent;
-        public event EventHandler<string> MessageSendingEvent; // esemény a válaszhoz
+        public event EventHandler RawDataReceivedEvent;
+        public event EventHandler ResponseReceivedEvent; // esemény a válaszhoz
+        public event EventHandler DataSendedEvent;
+        public event EventHandler MessageSendingEvent; // esemény a válaszhoz
         private const char StartBit = '#';
         private const char EndBit = '!';
         private const char Delimiter = ';';
@@ -22,8 +22,10 @@ namespace PufferTeszt
         private AutoResetEvent responseWaiter;
         private CancellationToken cancellationToken;
         private CancellationTokenSource cts;
-        private string dataBuffer = string.Empty;
-        string receivedData = string.Empty;
+        private string rawData = string.Empty;
+        private string receivedData = string.Empty;
+        private string sendedData = string.Empty;
+        private string msg = string.Empty;
         public bool IsRuningCommunication { get; private set; } = false;
 
         public bool RTSInvert { get; set; }
@@ -34,15 +36,12 @@ namespace PufferTeszt
         {
             serialPort = port;
             this.parameters = parameters;
-           // parameters.AddParameterEvent +=  OnAddParameter;
             serialPort.DataReceived += OnDataReceived;
             responseWaiter = new AutoResetEvent(false);
             RTSInvert = false;
             this.parameters.ClearParameterEvent += OnClearSendingData;
         }
         
-       // public void SetRTSInver(bool isInvert) => RTSInvert = isInvert;
-
         public void StartCommunication()
         {
             IsRuningCommunication = true;
@@ -51,6 +50,25 @@ namespace PufferTeszt
             cancellationToken = new CancellationToken();
             cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             Task.Run(() => ProcessParameterItem(cts.Token)); 
+        }
+
+        public string GetReadedData()
+        {
+            return receivedData;
+        }
+
+        public string GetRawData()
+        {
+            return rawData;
+        }
+        public string GetSendedData()
+        {
+            return sendedData;
+        }
+
+        public string GetMessage()
+        {
+            return msg;
         }
 
         public void StopCommunication()
@@ -67,13 +85,14 @@ namespace PufferTeszt
         {
             try
             {
-                var rawRdata = serialPort.ReadExisting();
-                RawDataEventCalling(rawRdata);
-                receivedData += rawRdata;
-                // int startindex = rawRdata.IndexOf(StartBit);
+                rawData = serialPort.ReadExisting();
+                RawDataEventCalling();
+                receivedData += rawData;
+                Thread.Sleep(1);
+                // int startindex = rawData.IndexOf(StartBit);
                 // if (startindex != -1)
                 // {
-                //     receivedData += rawRdata.Substring(startindex);
+                //     receivedData += rawData.Substring(startindex);
                 // }
                 // else 
                 if (receivedData.Length >= 11)
@@ -81,30 +100,26 @@ namespace PufferTeszt
                     int startindex = receivedData.IndexOf(StartBit);
                     int endindex = receivedData.IndexOf(EndBit);
                     var lenght = receivedData.Length - endindex;
-                    string data = receivedData.Substring(startindex , endindex);
-                //}
-                //MessageSendingEventCalling("Adat méret: " + receivedData.Length);
-                //if (receivedData.Length >= 11)
-                //{
+                    if ( startindex > -1 && endindex > -1)
+                    {
+                        string data = receivedData.Substring(startindex , endindex);
+                    }
                     if (receivedData[0] == StartBit && receivedData[10] == EndBit)
                     {
-                        ProcessResponse(receivedData);
+                        ProcessResponse();
                         receivedData = string.Empty;
                         responseWaiter.Set();
                     }
                     receivedData = string.Empty;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                msg = ex.Message;
+                MessageSendingEventCalling();
                 responseWaiter.Reset();
                 throw;
             }
-        }
-
-        private void OnAddParameter(object sender, EventArgs e)
-        {
-           // ProcessParameterItem();
         }
 
         private void ProcessParameterItem(CancellationToken cancellation)
@@ -119,7 +134,6 @@ namespace PufferTeszt
                         {
                             var parameter = parameters.Dequeue();
                             var localeTask = new TaskCompletionSource<string>();
-                            // elküldjük a parancsot...
                             SendingData(parameter.Param);
                             responseWaiter.WaitOne();
                         }
@@ -140,23 +154,17 @@ namespace PufferTeszt
             {
                 if (serialPort.IsOpen)
                 {
-                    // byte[] data = Encoding.ASCII.GetBytes(sending);
                     serialPort.RtsEnable = RTSInvert ? false : true;
-                    // RawDataEventCalling($"RTS {(serialPort.RtsEnable ? "Write data" : "Read data")}{Environment.NewLine}");
-                    Thread.Sleep(2);
+                    Thread.Sleep(10);
                     var byteArr = Encoding.ASCII.GetBytes(sending);
                     for (var i = 0; i < byteArr.Length; i++)
                     {
                         serialPort.BaseStream.WriteByte(byteArr[i]);
                     }
-                    //serialPort.Write(sending.ToArray(), 0, sending.Length);
                     Thread.Sleep(2);
-                   
-                    // RawDataEventCalling($"RTS {(serialPort.RtsEnable ? "Write data" : "Read data")}{Environment.NewLine}");
-                    // Thread.Sleep(5);
                     serialPort.RtsEnable = RTSInvert ? true : false;
-                    // RawDataEventCalling($"RTS {(serialPort.RtsEnable ? "Write data" : "Read data")}{Environment.NewLine}");
-                    DataSendedEvent?.Invoke(this, sending);
+                    sendedData = sending;
+                    DataSendedEvent?.Invoke(this, EventArgs.Empty);
                 }
             }
             catch (Exception)
@@ -165,19 +173,19 @@ namespace PufferTeszt
             }
         }
 
-        private void ProcessResponse(string response)
+        private void ProcessResponse()
         {
-            ResponseReceivedEvent?.Invoke(this, response);
+            ResponseReceivedEvent?.Invoke(this, EventArgs.Empty);
         }
        
-        private void RawDataEventCalling(string rawData)
+        private void RawDataEventCalling()
         {
-            RawDataReceivedEvent?.Invoke(this, rawData);
+            RawDataReceivedEvent?.Invoke(this, EventArgs.Empty);
         }
 
-        private void MessageSendingEventCalling(string message)
+        private void MessageSendingEventCalling()
         {
-            MessageSendingEvent?.Invoke(this, message);
+            MessageSendingEvent?.Invoke(this, EventArgs.Empty);
         }
     }
 }

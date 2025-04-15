@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace PufferTeszt
 {
@@ -13,10 +12,19 @@ namespace PufferTeszt
         /// </summary>
         [STAThread]
         static void Main()
-        {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new PufferTeszt());
+        {   
+            try
+            {
+                // Eseménynapló írása
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new PufferTeszt());
+            }
+            catch (Exception ex)
+            {
+                // Hibakezelés (pl. logolás, hibaüzenet megjelenítése)
+                MessageBox.Show($"Hiba az eseménynaplóba íráskor: {ex.Message}");
+            }
         }
     }
 }

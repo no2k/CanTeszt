@@ -1,18 +1,14 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Text;
 using System.Globalization;
 using System.IO.Ports;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-//using SharedModels.Models;
+
 namespace PufferTeszt
 {
     public partial class PufferTeszt : Form
@@ -107,14 +103,14 @@ namespace PufferTeszt
             }
         }
 
-        private void OnRefreshStatusText(object sender, string text)
+        private void OnRefreshStatusText(object sender, EventArgs e)
         {
-            this.Invoke(new Action<string>(OnRefreshStatusText),text) ;
+           // this.Invoke(new Action<string>(OnRefreshStatusText),text) ;
         }
 
         private void OnRefreshStatusText(string text)
         {
-           MessageTbx.Text = text;
+            // MessageTbx.Text = text;
         }
 
         private void Baud_Cbx_SelectedIndexChanged(object sender, EventArgs e)
@@ -162,34 +158,68 @@ namespace PufferTeszt
             }
         }  
 
-        private void OnDataSended(object sender, string data)
+        private void OnDataSended(object sender, EventArgs e)
         {
             try
             {
-                this.Invoke(new Action<string>(RefreshDGVBoard), data);
+                if (communicator.IsRuningCommunication) 
+                {
+                    var data = communicator.GetSendedData() ;
+                    if (!string.IsNullOrWhiteSpace(data))    
+                    { 
+                        this.Invoke(new Action<string>(RefreshDGVBoard), data); 
+                    }
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(ex.Message, "Sikertelen adat kiiratás");
             }
         }
 
-        private void OnReceivedRawData(object sender, string rawData)
+        private void OnReceivedRawData(object sender, EventArgs e)
         {
-           this.Invoke(new Action<string>(RefreshReceivedRawData), rawData);
+            try
+            {
+
+                if (communicator.IsRuningCommunication)
+                {
+                    var rawData = communicator.GetRawData() ?? string.Empty;
+                    this.Invoke(new Action<string>(RefreshReceivedRawData), rawData);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Sikertelen RawDataBox frissítés");
+            }
         }
 
         private void RefreshReceivedRawData(string rawData)
         {
-            ReceivedDataTbx.AppendText($"{rawData} -> {string.Join(" ", rawData.Select(x => ((int)x).ToString("X2")))}{Environment.NewLine}");
+            try
+            {
+                ReceivedDataTbx.AppendText($"{rawData} -> {string.Join(" ", rawData.Select(x => ((int)x).ToString("X2")))}{Environment.NewLine}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Sikertelen RawDataBox frissítés");
+            }
         }
       
-        private void ProcessingResponseData(object sender, string response)
+        private void ProcessingResponseData(object sender, EventArgs e)
         {
             try
             {
-                this.Invoke(new Action<string>(RefreshDashboard), response);
-                this.Invoke(new Action<string>(RefreshDGVBoard), response);
+                var response = communicator.GetReadedData();
+                if (!string.IsNullOrWhiteSpace(response))
+                { 
+                    this.Invoke(new Action<string>(RefreshDashboard), response);
+                    this.Invoke(new Action<string>(RefreshDGVBoard), response);
+                }
+                else
+                {
+                    MessageBox.Show(response, "Üres válasz érkezett!");
+                }
             }
             catch (Exception ex)
             {
@@ -210,86 +240,140 @@ namespace PufferTeszt
                      dataArr[0], 
                      dataArr[1], 
                      dataArr[2]
-                 };            
+                 };
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Nem sikerült a nyers adatok konvertálása!\n\r" + ex.Message);
+                MessageBox.Show("Nem sikerült a nyers adatok konvertálása!\n\r" + ex.Message, "Konvertálási hiba");
                 return default;
             }
         }
 
         private void RefreshDGVBoard(string data)
-            => IOTableViewDGV.Rows.Add(ConvertToDGViewParams(DateTime.Now, data, ++dataIndex));
+        {
+            try
+            {
+                var rowIndex =  IOTableViewDGV.Rows.Add(ConvertToDGViewParams(DateTime.Now, data, ++dataIndex));
+                var row = IOTableViewDGV.Rows[rowIndex];
+
+                if (data.Contains("RSP"))
+                {
+                    row.DefaultCellStyle.BackColor = Color.FromArgb(64, 203, 129) ;
+                }
+                else if (data.Contains("SET"))
+                {
+                    row.DefaultCellStyle.BackColor = Color.FromArgb(255, 167, 60);
+                }
+                else if (data.Contains("GET"))
+                {
+                    row.DefaultCellStyle.BackColor = Color.FromArgb(255, 255, 133);
+                }
+                else
+                {
+                    row.DefaultCellStyle.BackColor = Color.White;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Sikertelen adatábla frissítés");
+            }
+        }
      
         private void RefreshDashboard(string data)
         {
-            if (string.IsNullOrEmpty(data)) { return; };
-            if ( data.First() == StartBit && data.Last() == EndBit)
+            try
             {
-                var dataArr = SeparateData(data);
-                if (dataArr.Length > 0 && dataArr[0] == Response) {
-                    switch (dataArr[1])
+                if (string.IsNullOrEmpty(data)) { return; };
+                if ( data.First() == StartBit && data.Last() == EndBit)
+                {
+                    var dataArr = SeparateData(data);
+                    if (dataArr.Length > 0 && dataArr[0] == Response) 
                     {
-                        case "P0": ActualEloreTxb.Text = dataArr[2];
-                            break;
-                        case "P1": ActualVisszaTxb.Text = dataArr[2];
-                            break;
-                        case "P2": ActualTEloreTxb.Text = dataArr[2];
-                            break;
-                        case "P3": ActualTVisszaTxb.Text = dataArr[2];
-                            break;
-                        case "P4": ActualTFelsoTxb.Text = dataArr[2];
-                            break;
-                        case "P5": ActualTKozepTxB.Text = dataArr[2];
-                            break;
-                        case "P6": ActualTAlsoTxb.Text = dataArr[2];
-                            break;
-                        case "P7": BelsoTxb.Text = dataArr[2];
-                            break;
-                        case "KI": 
+                        switch (dataArr[1])
                             {
-                                ActualCloseTxb.Text = dataArr[2];
-                                lastClosed = int.Parse(dataArr[2]);
-                            }
-                            break;
-                        case "BE":
-                            {
-                                ActualOpenTxb.Text = dataArr[2];
-                                lastOpened = int.Parse(dataArr[2]);
-                            }
-                            break;
-                        case "ST":
-                            {
-                                var value = int.Parse(dataArr[2]);
-                                ActualStatusTxb.Text = dataArr[2];
-                                lastStatus = value;
-                                if (value >= 99)
-                                {
-                                    FullNyitCbx.ForeColor = Color.FromArgb(25, 0, 255, 0);
-                                    FullZarCbx.ForeColor = Color.FromArgb(25, 255, 0, 0);
-                                }
-                                else if (value <= 1)
-                                {
-                                    FullNyitCbx.ForeColor = Color.FromArgb(25, 255, 0, 0);
-                                    FullZarCbx.ForeColor = Color.FromArgb(25, 0, 255, 0);
-                                }
-                                else
-                                {
-                                    FullNyitCbx.ForeColor = Color.FromArgb(25, Color.LightYellow);
-                                    FullZarCbx.ForeColor = Color.FromArgb(25, Color.LightYellow);
-                                }
-                            }
-                            break;
-                    }      
+                                case "P0":
+                                    ActualEloreTxb.Text = ValueConvert(dataArr[2]);
+                                    break;
+                                case "P1":
+                                    ActualVisszaTxb.Text = ValueConvert(dataArr[2]);
+                                    break;
+                                case "P2":
+                                    ActualTEloreTxb.Text = ValueConvert(dataArr[2]);
+                                    break;
+                                case "P3":
+                                    ActualTVisszaTxb.Text = ValueConvert(dataArr[2]);
+                                    break;
+                                case "P4":
+                                    ActualTFelsoTxb.Text = ValueConvert(dataArr[2]);
+                                    break;
+                                case "P5":
+                                    ActualTKozepTxB.Text = ValueConvert(dataArr[2]);
+                                    break;
+                                case "P6":
+                                    ActualTAlsoTxb.Text = ValueConvert(dataArr[2]);
+                                    break;
+                                case "P7":
+                                    BelsoTxb.Text = ValueConvert(dataArr[2]);
+                                    break;
+                                case "KI":
+                                    {
+                                        ActualCloseTxb.Text = dataArr[2];
+                                        lastClosed = int.Parse(dataArr[2]);
+                                    }
+                                    break;
+                                case "BE":
+                                    {
+                                        ActualOpenTxb.Text = dataArr[2];
+                                        lastOpened = int.Parse(dataArr[2]);
+                                    }
+                                    break;
+                                case "ST":
+                                    {
+                                        var value = int.Parse(dataArr[2].ToString());
+                                        ActualStatusTxb.Text = value.ToString();
+                                        lastStatus = value;
+                                        if (value >= 99)
+                                        {
+                                            FullNyitCbx.ForeColor = Color.FromArgb(25, 0, 255, 0);
+                                            FullZarCbx.ForeColor = Color.FromArgb(25, 255, 0, 0);
+                                        }
+                                        else if (value <= 1)
+                                        {
+                                            FullNyitCbx.ForeColor = Color.FromArgb(25, 255, 0, 0);
+                                            FullZarCbx.ForeColor = Color.FromArgb(25, 0, 255, 0);
+                                        }
+                                        else
+                                        {
+                                            FullNyitCbx.ForeColor = Color.FromArgb(25, Color.LightYellow);
+                                            FullZarCbx.ForeColor = Color.FromArgb(25, Color.LightYellow);
+                                        }
+                                    }
+                                    break;
+                            }      
+                    }
                 }
-            }        
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Sikertelen Dashboard frissítés");
+            }
+
+        }
+
+        private string ValueConvert(string data)
+        {
+            int num = 0;
+            if (int.TryParse(data, out num))
+            {
+                return num.ToString("00");
+            }
+            return "Er";
         }
 
         private string[] SeparateData(string data)
         {
             if (data.Length == 0) { return Array.Empty<string>(); }
-           return data.TrimStart(StartBit)
+            return data.TrimStart(StartBit)
                 .TrimEnd(EndBit)
                 .Split(Delimiter);
         }
@@ -332,7 +416,7 @@ namespace PufferTeszt
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(ex.Message, "Beállítási hiba");
             }
         }
 

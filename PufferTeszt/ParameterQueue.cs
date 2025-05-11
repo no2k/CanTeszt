@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PufferTeszt
 {
@@ -34,14 +30,21 @@ namespace PufferTeszt
 
         public T Dequeue()
         {
-            if (parameters.Count > 0)
+            try 
             {
-                var param = parameters.Dequeue();
-                RemoveParameterEvent?.Invoke(this, EventArgs.Empty);
-                parameters.TrimExcess();
-                return param;
+                if (parameters.Count > 0)
+                {
+                    var param = parameters.Dequeue();
+                    RemoveParameterEvent?.Invoke(this, EventArgs.Empty);
+                    //parameters.TrimExcess();
+                    return param;
+                }
+                return null;
             }
-            return null;
+            catch (Exception ex)
+            {
+                throw new Exception("Hiba a küldési sor utolsó kivett eleménél: ", ex);
+            }
         }
 
     }

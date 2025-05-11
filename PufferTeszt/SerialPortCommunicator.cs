@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO.Ports;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -134,8 +132,12 @@ namespace PufferTeszt
                         {
                             var parameter = parameters.Dequeue();
                             var localeTask = new TaskCompletionSource<string>();
-                            SendingData(parameter.Param);
-                            responseWaiter.WaitOne();
+                            if (parameter != null)
+                            { 
+                                Task.Delay(2);
+                                SendingData(parameter.Param);
+                                responseWaiter.WaitOne(TimeSpan.FromSeconds(2));
+                            }
                         }
                         responseWaiter.Reset();
                     }

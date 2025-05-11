@@ -255,9 +255,9 @@
             this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.label13.Location = new System.Drawing.Point(298, 157);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(25, 18);
+            this.label13.Size = new System.Drawing.Size(16, 18);
             this.label13.TabIndex = 8;
-            this.label13.Text = "°C";
+            this.label13.Text = "0";
             // 
             // label5
             // 
@@ -830,17 +830,24 @@
             // 
             // groupBox6
             // 
+            this.groupBox6.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox6.BackColor = System.Drawing.SystemColors.ControlLight;
             this.groupBox6.Controls.Add(this.IOTableViewDGV);
             this.groupBox6.Location = new System.Drawing.Point(3, 437);
             this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Size = new System.Drawing.Size(719, 196);
+            this.groupBox6.Size = new System.Drawing.Size(718, 236);
             this.groupBox6.TabIndex = 10;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Kommunikáció";
             // 
             // IOTableViewDGV
             // 
+            this.IOTableViewDGV.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.IOTableViewDGV.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCells;
             this.IOTableViewDGV.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.IOTableViewDGV.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Id,
@@ -849,11 +856,10 @@
             this.Cmd,
             this.IdName,
             this.Value});
-            this.IOTableViewDGV.Dock = System.Windows.Forms.DockStyle.Fill;
             this.IOTableViewDGV.Location = new System.Drawing.Point(3, 16);
             this.IOTableViewDGV.Name = "IOTableViewDGV";
             this.IOTableViewDGV.RowHeadersWidth = 51;
-            this.IOTableViewDGV.Size = new System.Drawing.Size(713, 177);
+            this.IOTableViewDGV.Size = new System.Drawing.Size(712, 217);
             this.IOTableViewDGV.TabIndex = 0;
             // 
             // Id
@@ -933,7 +939,8 @@
             // 
             // MessageTbx
             // 
-            this.MessageTbx.Location = new System.Drawing.Point(3, 639);
+            this.MessageTbx.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.MessageTbx.Location = new System.Drawing.Point(3, 679);
             this.MessageTbx.Name = "MessageTbx";
             this.MessageTbx.Size = new System.Drawing.Size(716, 20);
             this.MessageTbx.TabIndex = 12;
@@ -959,7 +966,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(727, 671);
+            this.ClientSize = new System.Drawing.Size(726, 711);
             this.Controls.Add(this.DirectDataTxb);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.MessageTbx);
@@ -970,6 +977,7 @@
             this.Controls.Add(this.StateBox);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "PufferTeszt";
             this.Text = "Puffer Teszt";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PufferTeszt_FormClosing);

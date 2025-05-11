@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PufferTeszt
@@ -15,7 +16,7 @@ namespace PufferTeszt
     {
         private ParamQueue<Parameter> parameters = new ParamQueue<Parameter>();
         private SerialPortCommunicator communicator;
-       
+
         private List<int> BaudRates { get; } = new List<int>() { 110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, 115200 };
         private const char StartBit = '#';
         private const char EndBit = '!';
@@ -24,11 +25,11 @@ namespace PufferTeszt
         private const string GetData = "GET";
         private const string SETData = "SET";
         private int dataIndex = 0;
-       
+
         int lastStatus = 0;
         int lastOpened = 0;
         int lastClosed = 0;
-        NumberFormatInfo nfi = new NumberFormatInfo(); 
+        NumberFormatInfo nfi = new NumberFormatInfo();
 
         public PufferTeszt()
         {
@@ -74,9 +75,9 @@ namespace PufferTeszt
 
         private void PortList_Cbx_SelectedIndexChanged(object sender, EventArgs e)
         {
-            serialPort1.PortName =  PortList_Cbx.SelectedItem.ToString();
+            serialPort1.PortName = PortList_Cbx.SelectedItem.ToString();
         }
-        
+
         private void ConnectBtn_Click(object sender, EventArgs e)
         {
             try
@@ -105,7 +106,7 @@ namespace PufferTeszt
 
         private void OnRefreshStatusText(object sender, EventArgs e)
         {
-           // this.Invoke(new Action<string>(OnRefreshStatusText),text) ;
+            // this.Invoke(new Action<string>(OnRefreshStatusText),text) ;
         }
 
         private void OnRefreshStatusText(string text)
@@ -115,7 +116,7 @@ namespace PufferTeszt
 
         private void Baud_Cbx_SelectedIndexChanged(object sender, EventArgs e)
         {
-           serialPort1.BaudRate = (int)Baud_Cbx.SelectedItem;
+            serialPort1.BaudRate = (int)Baud_Cbx.SelectedItem;
         }
 
         private void DisconnectBtn_Click(object sender, EventArgs e)
@@ -156,18 +157,18 @@ namespace PufferTeszt
             {
                 MessageBox.Show(ex.Message);
             }
-        }  
+        }
 
         private void OnDataSended(object sender, EventArgs e)
         {
             try
             {
-                if (communicator.IsRuningCommunication) 
+                if (communicator.IsRuningCommunication)
                 {
-                    var data = communicator.GetSendedData() ;
-                    if (!string.IsNullOrWhiteSpace(data))    
-                    { 
-                        this.Invoke(new Action<string>(RefreshDGVBoard), data); 
+                    var data = communicator.GetSendedData();
+                    if (!string.IsNullOrWhiteSpace(data))
+                    {
+                        this.Invoke(new Action<string>(RefreshDGVBoard), data);
                     }
                 }
             }
@@ -205,14 +206,14 @@ namespace PufferTeszt
                 MessageBox.Show(ex.Message, "Sikertelen RawDataBox frissítés");
             }
         }
-      
+
         private void ProcessingResponseData(object sender, EventArgs e)
         {
             try
             {
                 var response = communicator.GetReadedData();
                 if (!string.IsNullOrWhiteSpace(response))
-                { 
+                {
                     this.Invoke(new Action<string>(RefreshDashboard), response);
                     this.Invoke(new Action<string>(RefreshDGVBoard), response);
                 }
@@ -227,20 +228,20 @@ namespace PufferTeszt
             }
         }
 
-        private object[] ConvertToDGViewParams(DateTimeOffset time, string data, int index) 
+        private object[] ConvertToDGViewParams(DateTimeOffset time, string data, int index)
         {
             try
             {
-                 string[] dataArr = SeparateData(data);
-                 return new object[] 
-                 { 
-                     index, 
-                     time.ToString("yyyy.MM.dd.-HH:mm:ss.fff"), 
-                     data, 
-                     dataArr[0], 
-                     dataArr[1], 
+                string[] dataArr = SeparateData(data);
+                return new object[]
+                {
+                     index,
+                     time.ToString("yyyy.MM.dd.-HH:mm:ss.fff"),
+                     data,
+                     dataArr[0],
+                     dataArr[1],
                      dataArr[2]
-                 };
+                };
             }
             catch (Exception ex)
             {
@@ -253,12 +254,12 @@ namespace PufferTeszt
         {
             try
             {
-                var rowIndex =  IOTableViewDGV.Rows.Add(ConvertToDGViewParams(DateTime.Now, data, ++dataIndex));
+                var rowIndex = IOTableViewDGV.Rows.Add(ConvertToDGViewParams(DateTime.Now, data, ++dataIndex));
                 var row = IOTableViewDGV.Rows[rowIndex];
 
                 if (data.Contains("RSP"))
                 {
-                    row.DefaultCellStyle.BackColor = Color.FromArgb(64, 203, 129) ;
+                    row.DefaultCellStyle.BackColor = Color.FromArgb(64, 203, 129);
                 }
                 else if (data.Contains("SET"))
                 {
@@ -278,78 +279,83 @@ namespace PufferTeszt
                 MessageBox.Show(ex.Message, "Sikertelen adatábla frissítés");
             }
         }
-     
+
         private void RefreshDashboard(string data)
         {
             try
             {
-                if (string.IsNullOrEmpty(data)) { return; };
-                if ( data.First() == StartBit && data.Last() == EndBit)
+                if (string.IsNullOrEmpty(data)) { return; }
+                ;
+                if (data.First() == StartBit && data.Last() == EndBit)
                 {
                     var dataArr = SeparateData(data);
-                    if (dataArr.Length > 0 && dataArr[0] == Response) 
+                    if (dataArr.Length > 0 && dataArr[0] == Response)
                     {
                         switch (dataArr[1])
-                            {
-                                case "P0":
-                                    ActualEloreTxb.Text = ValueConvert(dataArr[2]);
-                                    break;
-                                case "P1":
-                                    ActualVisszaTxb.Text = ValueConvert(dataArr[2]);
-                                    break;
-                                case "P2":
-                                    ActualTEloreTxb.Text = ValueConvert(dataArr[2]);
-                                    break;
-                                case "P3":
-                                    ActualTVisszaTxb.Text = ValueConvert(dataArr[2]);
-                                    break;
-                                case "P4":
-                                    ActualTFelsoTxb.Text = ValueConvert(dataArr[2]);
-                                    break;
-                                case "P5":
-                                    ActualTKozepTxB.Text = ValueConvert(dataArr[2]);
-                                    break;
-                                case "P6":
-                                    ActualTAlsoTxb.Text = ValueConvert(dataArr[2]);
-                                    break;
-                                case "P7":
-                                    BelsoTxb.Text = ValueConvert(dataArr[2]);
-                                    break;
-                                case "KI":
+                        {
+                            case "P0":
+                                ActualEloreTxb.Text = ValueConvert(dataArr[2]);
+                                break;
+                            case "P1":
+                                ActualVisszaTxb.Text = ValueConvert(dataArr[2]);
+                                break;
+                            case "P2":
+                                ActualTEloreTxb.Text = ValueConvert(dataArr[2]);
+                                break;
+                            case "P3":
+                                ActualTVisszaTxb.Text = ValueConvert(dataArr[2]);
+                                break;
+                            case "P4":
+                                ActualTFelsoTxb.Text = ValueConvert(dataArr[2]);
+                                break;
+                            case "P5":
+                                ActualTKozepTxB.Text = ValueConvert(dataArr[2]);
+                                break;
+                            case "P6":
+                                ActualTAlsoTxb.Text = ValueConvert(dataArr[2]);
+                                break;
+                            case "P7":
+                                BelsoTxb.Text = ValueConvert(dataArr[2]);
+                                break;
+                            case "KI":
+                                {
+                                    ActualCloseTxb.Text = dataArr[2];
+                                    lastClosed = int.Parse(dataArr[2]);
+                                }
+                                break;
+                            case "BE":
+                                {
+                                    ActualOpenTxb.Text = dataArr[2];
+                                    lastOpened = int.Parse(dataArr[2]);
+                                }
+                                break;
+                            case "ST":
+                                {
+                                    int value = 0;
+                                    if (int.TryParse(dataArr[2],out var val))
                                     {
-                                        ActualCloseTxb.Text = dataArr[2];
-                                        lastClosed = int.Parse(dataArr[2]);
+                                        value = val;
                                     }
-                                    break;
-                                case "BE":
+                                    ActualStatusTxb.Text = value.ToString();
+                                    lastStatus = value;
+                                    if (value >= 99)
                                     {
-                                        ActualOpenTxb.Text = dataArr[2];
-                                        lastOpened = int.Parse(dataArr[2]);
+                                        FullNyitCbx.ForeColor = Color.FromArgb(25, 0, 255, 0);
+                                        FullZarCbx.ForeColor = Color.FromArgb(25, 255, 0, 0);
                                     }
-                                    break;
-                                case "ST":
+                                    else if (value <= 1)
                                     {
-                                        var value = int.Parse(dataArr[2].ToString());
-                                        ActualStatusTxb.Text = value.ToString();
-                                        lastStatus = value;
-                                        if (value >= 99)
-                                        {
-                                            FullNyitCbx.ForeColor = Color.FromArgb(25, 0, 255, 0);
-                                            FullZarCbx.ForeColor = Color.FromArgb(25, 255, 0, 0);
-                                        }
-                                        else if (value <= 1)
-                                        {
-                                            FullNyitCbx.ForeColor = Color.FromArgb(25, 255, 0, 0);
-                                            FullZarCbx.ForeColor = Color.FromArgb(25, 0, 255, 0);
-                                        }
-                                        else
-                                        {
-                                            FullNyitCbx.ForeColor = Color.FromArgb(25, Color.LightYellow);
-                                            FullZarCbx.ForeColor = Color.FromArgb(25, Color.LightYellow);
-                                        }
+                                        FullNyitCbx.ForeColor = Color.FromArgb(25, 255, 0, 0);
+                                        FullZarCbx.ForeColor = Color.FromArgb(25, 0, 255, 0);
                                     }
-                                    break;
-                            }      
+                                    else
+                                    {
+                                        FullNyitCbx.ForeColor = Color.FromArgb(25, Color.Black);
+                                        FullZarCbx.ForeColor = Color.FromArgb(25, Color.Black);
+                                    }
+                                }
+                                break;
+                        }
                     }
                 }
             }
@@ -422,10 +428,10 @@ namespace PufferTeszt
 
         private void FetchTimeNud_ValueChanged(object sender, EventArgs e)
         {
-            timer1.Interval = (int)FetchTimeNud.Value*1000;
+            timer1.Interval = (int)FetchTimeNud.Value * 1000;
         }
 
-        public string GenerateSendingData(string command, string id, int value = 0 )
+        public string GenerateSendingData(string command, string id, int value = 0)
         {
             var data = StartBit
                        + command
@@ -443,31 +449,41 @@ namespace PufferTeszt
             StopFetchBtn.Enabled = true;
             timer1.Start();
         }
-       
+
         private void timer1_Tick(object sender, EventArgs e)
         {
-            var data = GenerateSendingData(GetData, "P0");
-            parameters.Enqueue(new Parameter(data, true));
-            data = GenerateSendingData(GetData, "P1");
-            parameters.Enqueue(new Parameter(data, true));
-            data = GenerateSendingData(GetData, "P2");
-            parameters.Enqueue(new Parameter(data, true));
-            data = GenerateSendingData(GetData, "P3");
-            parameters.Enqueue(new Parameter(data, true));
-            data = GenerateSendingData(GetData, "P4");
-            parameters.Enqueue(new Parameter(data, true));
-            data = GenerateSendingData(GetData, "P5");
-            parameters.Enqueue(new Parameter(data, true));
-            data = GenerateSendingData(GetData, "P6");
-            parameters.Enqueue(new Parameter(data, true));
-            data = GenerateSendingData(GetData, "P7");
-            parameters.Enqueue(new Parameter(data, true));
-            data = GenerateSendingData(GetData, "KI");
-            parameters.Enqueue(new Parameter(data, true));
-            data = GenerateSendingData(GetData, "BE");
-            parameters.Enqueue(new Parameter(data, true));
-            data = GenerateSendingData(GetData, "ST");
-            parameters.Enqueue(new Parameter(data, true));
+            if (parameters.Count < 33)
+            {
+                var data = GenerateSendingData(GetData, "P0");
+                parameters.Enqueue(new Parameter(data, true));
+                data = GenerateSendingData(GetData, "P1");
+                parameters.Enqueue(new Parameter(data, true));
+                data = GenerateSendingData(GetData, "P2");
+                parameters.Enqueue(new Parameter(data, true));
+                data = GenerateSendingData(GetData, "P3");
+                parameters.Enqueue(new Parameter(data, true));
+                data = GenerateSendingData(GetData, "P4");
+                parameters.Enqueue(new Parameter(data, true));
+                data = GenerateSendingData(GetData, "P5");
+                parameters.Enqueue(new Parameter(data, true));
+                data = GenerateSendingData(GetData, "P6");
+                parameters.Enqueue(new Parameter(data, true));
+                data = GenerateSendingData(GetData, "P7");
+                parameters.Enqueue(new Parameter(data, true));
+                data = GenerateSendingData(GetData, "KI");
+                parameters.Enqueue(new Parameter(data, true));
+                data = GenerateSendingData(GetData, "BE");
+                parameters.Enqueue(new Parameter(data, true));
+                data = GenerateSendingData(GetData, "ST");
+                parameters.Enqueue(new Parameter(data, true));
+            }
+            else
+            {
+                MessageTbx.ForeColor = Color.Black;
+                MessageTbx.Text = "A küldési sor megtelt! Várakozás a küldésre...";
+                Task.Delay(10);
+                MessageTbx.Clear();
+            }
         }
 
         private void StopFetchBtn_Click(object sender, EventArgs e)
@@ -493,7 +509,7 @@ namespace PufferTeszt
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message,"Közvetlen adatküldés hiba");
+                MessageBox.Show(ex.Message, "Közvetlen adatküldés hiba");
             }
         }
     }

@@ -101,6 +101,7 @@ namespace PufferTeszt
                     if ( startindex > -1 && endindex > -1)
                     {
                         string data = receivedData.Substring(startindex , endindex);
+                        data = data.Substring(0, 11);
                     }
                     if (receivedData[0] == StartBit && receivedData[10] == EndBit)
                     {

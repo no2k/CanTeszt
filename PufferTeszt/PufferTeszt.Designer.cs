@@ -433,9 +433,9 @@
             this.FullNyitCbx.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.FullNyitCbx.Location = new System.Drawing.Point(174, 132);
             this.FullNyitCbx.Name = "FullNyitCbx";
-            this.FullNyitCbx.Size = new System.Drawing.Size(49, 21);
+            this.FullNyitCbx.Size = new System.Drawing.Size(51, 21);
             this.FullNyitCbx.TabIndex = 26;
-            this.FullNyitCbx.Text = "Zár";
+            this.FullNyitCbx.Text = "Nyit";
             this.FullNyitCbx.UseVisualStyleBackColor = true;
             // 
             // FullZarCbx
@@ -444,9 +444,9 @@
             this.FullZarCbx.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.FullZarCbx.Location = new System.Drawing.Point(117, 132);
             this.FullZarCbx.Name = "FullZarCbx";
-            this.FullZarCbx.Size = new System.Drawing.Size(51, 21);
+            this.FullZarCbx.Size = new System.Drawing.Size(49, 21);
             this.FullZarCbx.TabIndex = 25;
-            this.FullZarCbx.Text = "Nyit";
+            this.FullZarCbx.Text = "Zár";
             this.FullZarCbx.UseVisualStyleBackColor = true;
             // 
             // BealllitBtn
@@ -469,6 +469,7 @@
             this.VeszhutesCBx.TabIndex = 23;
             this.VeszhutesCBx.Text = "Vészhűtés?";
             this.VeszhutesCBx.UseVisualStyleBackColor = true;
+            this.VeszhutesCBx.CheckedChanged += new System.EventHandler(this.VeszhutesCBx_CheckedChanged);
             // 
             // label24
             // 

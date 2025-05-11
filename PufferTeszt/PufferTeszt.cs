@@ -512,5 +512,10 @@ namespace PufferTeszt
                 MessageBox.Show(ex.Message, "Közvetlen adatküldés hiba");
             }
         }
+
+        private void VeszhutesCBx_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }
